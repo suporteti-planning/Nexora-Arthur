@@ -1,17 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { EMPTY, Subject, debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs';
+import { AuthService } from '../../core/services/login-response';
+import { PasswordVaultApi, VaultEntryDetails, VaultEntryRequest, VaultEntrySummary, VaultUserOption, VaultVisibility } from '../../core/services/password-vault-api';
+import { environment } from '../../../environments/environment';
 
-interface VaultEntry {
-  id: number;
-  title: string;
-  username: string;
-  password: string;
-  url: string;
-  category: string;
-  description: string;
-  updatedAt: Date;
-}
+type VaultEntry = VaultEntrySummary;
 
 interface PasswordForm {
   title: string;
@@ -20,6 +16,8 @@ interface PasswordForm {
   url: string;
   category: string;
   description: string;
+  visibility: VaultVisibility;
+  sharedWith: string[];
 }
 
 @Component({
@@ -29,10 +27,13 @@ interface PasswordForm {
   templateUrl: './password-vault.html',
   styleUrl: './password-vault.css'
 })
-export class PasswordVault {
+export class PasswordVault implements OnInit {
   readonly initialCategories = ['Trabalho', 'Pessoal', 'Financeiro', 'Redes sociais', 'Outros'];
   categories = [...this.initialCategories];
   entries: VaultEntry[] = [];
+  users: VaultUserOption[] = [];
+  userSearch = '';
+  userSearchLoading = false;
   searchTerm = '';
   selectedCategory = 'Todas';
   editingEntryId: number | null = null;
@@ -44,18 +45,60 @@ export class PasswordVault {
   newCategoryName = '';
   generatorLength = 20;
   generatorError = '';
+  generatedPassword = '';
   passwordError = '';
+  loading = true;
+  saving = false;
+  requiresLogin = false;
+  loginUsername = '';
+  loginPassword = '';
+  loginError = '';
+  errorMessage = '';
   characterTypes = { uppercase: true, lowercase: true, numbers: true, symbols: true };
   form: PasswordForm = this.emptyForm();
+  private readonly userSearchChanges = new Subject<string>();
+
+  constructor(
+    private readonly vaultApi: PasswordVaultApi,
+    private readonly authService: AuthService,
+    private readonly cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.loadEntries();
+    this.userSearchChanges.pipe(
+      debounceTime(250),
+      distinctUntilChanged(),
+      switchMap(search => this.vaultApi.users(search, this.form.sharedWith).pipe(
+        catchError(error => {
+          this.userSearchLoading = false;
+          this.setError(error, 'Não foi possível pesquisar usuários para compartilhar.');
+          this.cdr.markForCheck();
+          return EMPTY;
+        })
+      ))
+    ).subscribe({
+      next: users => {
+        this.users = users;
+        this.userSearchLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: error => {
+        this.userSearchLoading = false;
+        this.setError(error, 'A pesquisa de usuários foi interrompida.');
+        this.cdr.markForCheck();
+      }
+    });
+  }
 
   get filteredEntries(): VaultEntry[] {
     const search = this.searchTerm.trim().toLocaleLowerCase('pt-BR');
     return this.entries.filter(entry => {
       const inCategory = this.selectedCategory === 'Todas' || entry.category === this.selectedCategory;
       const matchesSearch = [entry.title, entry.username, entry.url, entry.category, entry.description]
-        .some(value => value.toLocaleLowerCase('pt-BR').includes(search));
+        .some(value => (value ?? '').toLocaleLowerCase('pt-BR').includes(search));
       return inCategory && matchesSearch;
-    }).sort((first, second) => second.updatedAt.getTime() - first.updatedAt.getTime());
+    }).sort((first, second) => Date.parse(second.updatedAt) - Date.parse(first.updatedAt));
   }
 
   categoryCount(category: string): number {
@@ -65,17 +108,45 @@ export class PasswordVault {
   openCreateModal(): void {
     this.editingEntryId = null;
     this.form = this.emptyForm();
+    this.userSearch = '';
+    this.users = [];
     this.showPassword = false;
     this.passwordError = '';
     this.showEntryModal = true;
+    this.searchShareUsers();
   }
 
   openEditModal(entry: VaultEntry): void {
+    if (!entry.canEdit) return;
+    this.errorMessage = '';
+    this.vaultApi.get(entry.id).subscribe({
+      next: details => this.showEditModal(details),
+      error: error => {
+        this.setError(error, 'Não foi possível abrir esta credencial.');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private showEditModal(entry: VaultEntryDetails): void {
     this.editingEntryId = entry.id;
-    this.form = { ...entry };
+    this.form = {
+      title: entry.title,
+      username: entry.username,
+      password: entry.password,
+      url: entry.url ?? '',
+      category: entry.category,
+      description: entry.description ?? '',
+      visibility: entry.visibility,
+      sharedWith: [...entry.sharedWith]
+    };
+    this.userSearch = '';
+    this.users = [];
+    this.mergeCategory(entry.category);
     this.showPassword = false;
     this.passwordError = '';
     this.showEntryModal = true;
+    this.searchShareUsers();
   }
 
   closeEntryModal(): void {
@@ -86,18 +157,116 @@ export class PasswordVault {
   saveEntry(): void {
     if (!this.form.title.trim() || !this.form.username.trim() || !this.form.password || !this.form.category) return;
 
-    if (this.editingEntryId === null) {
-      this.entries = [{ ...this.form, id: Date.now(), updatedAt: new Date() }, ...this.entries];
-    } else {
-      this.entries = this.entries.map(entry => entry.id === this.editingEntryId
-        ? { ...entry, ...this.form, updatedAt: new Date() }
-        : entry);
-    }
-    this.closeEntryModal();
+    this.saving = true;
+    this.errorMessage = '';
+    const request: VaultEntryRequest = { ...this.form };
+    const operation = this.editingEntryId === null
+      ? this.vaultApi.create(request)
+      : this.vaultApi.update(this.editingEntryId, request);
+
+    operation.subscribe({
+      next: () => {
+        this.saving = false;
+        this.closeEntryModal();
+        this.cdr.markForCheck();
+        this.loadEntries();
+      },
+      error: error => {
+        this.saving = false;
+        this.setError(error, 'Não foi possível salvar a credencial.');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  toggleViewer(username: string): void {
+    this.form.sharedWith = this.form.sharedWith.includes(username)
+      ? this.form.sharedWith.filter(viewer => viewer !== username)
+      : [...this.form.sharedWith, username];
+  }
+
+  searchShareUsers(): void {
+    if (this.form.visibility !== 'PRIVATE') return;
+    this.userSearchLoading = true;
+    this.userSearchChanges.next(this.userSearch);
+  }
+
+  isViewerSelected(username: string): boolean {
+    return this.form.sharedWith.includes(username);
+  }
+
+  deleteEntry(entry: VaultEntry): void {
+    if (!entry.canEdit || !window.confirm(`Excluir a credencial "${entry.title}"?`)) return;
+    this.vaultApi.delete(entry.id).subscribe({
+      next: () => {
+        this.cdr.markForCheck();
+        this.loadEntries();
+      },
+      error: error => {
+        this.setError(error, 'Não foi possível excluir a credencial.');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  login(): void {
+    this.loginError = '';
+    this.authService.login(this.loginUsername, this.loginPassword).subscribe({
+      next: response => {
+        this.authService.saveToken(response.token);
+        this.loginPassword = '';
+        this.requiresLogin = false;
+        this.cdr.markForCheck();
+        this.loadEntries();
+      },
+      error: () => {
+        this.loginError = 'Não foi possível entrar. Confira usuário e senha do ambiente de desenvolvimento.';
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  loginWithMicrosoft(): void {
+    window.location.assign(`${environment.apiUrl}/oauth2/authorization/azure`);
+  }
+
+  private loadEntries(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    this.vaultApi.list().subscribe({
+      next: entries => {
+        this.entries = entries;
+        entries.forEach(entry => this.mergeCategory(entry.category));
+        this.loading = false;
+        this.requiresLogin = false;
+        this.cdr.markForCheck();
+      },
+      error: error => {
+        this.loading = false;
+        if (error instanceof HttpErrorResponse && (error.status === 401 || error.status === 403)) {
+          this.requiresLogin = true;
+          this.cdr.markForCheck();
+          return;
+        }
+        this.setError(error, 'Não foi possível carregar o cofre de senhas.');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private mergeCategory(category: string): void {
+    if (!this.categories.includes(category)) this.categories = [...this.categories, category];
+  }
+
+  private setError(error: unknown, fallback: string): void {
+    this.errorMessage = error instanceof HttpErrorResponse
+      ? error.error?.message ?? fallback
+      : fallback;
   }
 
   openGenerator(): void {
     this.generatorError = '';
+    this.generatedPassword = '';
     this.showGenerator = true;
   }
 
@@ -111,6 +280,8 @@ export class PasswordVault {
   }
 
   generatePassword(): void {
+    this.generatorError = '';
+    this.generatedPassword = '';
     const groups = [
       this.characterTypes.uppercase ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' : '',
       this.characterTypes.lowercase ? 'abcdefghijklmnopqrstuvwxyz' : '',
@@ -133,13 +304,17 @@ export class PasswordVault {
         const swapIndex = this.randomIndex(index + 1);
         [generated[index], generated[swapIndex]] = [generated[swapIndex], generated[index]];
       }
-      this.form.password = generated.join('');
-      this.showPassword = true;
-      this.generatorError = '';
-      this.showGenerator = false;
+      this.generatedPassword = generated.join('');
     } catch {
       this.generatorError = 'Este navegador não disponibiliza geração segura de senhas.';
     }
+  }
+
+  useGeneratedPassword(): void {
+    if (!this.generatedPassword) return;
+    this.form.password = this.generatedPassword;
+    this.showPassword = true;
+    this.closeGenerator();
   }
 
   addCategory(): void {
@@ -154,7 +329,10 @@ export class PasswordVault {
 
   async copyPassword(entry: VaultEntry): Promise<void> {
     try {
-      await navigator.clipboard.writeText(entry.password);
+      const secret = await new Promise<string>((resolve, reject) => {
+        this.vaultApi.getSecret(entry.id).subscribe({ next: value => resolve(value.password), error: reject });
+      });
+      await navigator.clipboard.writeText(secret);
       this.copiedEntryId = entry.id;
       window.setTimeout(() => {
         if (this.copiedEntryId === entry.id) this.copiedEntryId = null;
@@ -176,6 +354,9 @@ export class PasswordVault {
   }
 
   private emptyForm(): PasswordForm {
-    return { title: '', username: '', password: '', url: '', category: this.initialCategories[0], description: '' };
+    return {
+      title: '', username: '', password: '', url: '', category: this.initialCategories[0], description: '',
+      visibility: 'PRIVATE', sharedWith: []
+    };
   }
 }

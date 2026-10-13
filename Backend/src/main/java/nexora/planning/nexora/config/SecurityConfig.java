@@ -80,6 +80,14 @@ public class SecurityConfig {
                 .requestMatchers("/api/doc/catalog/**").authenticated()
                 // Admin de usuários — apenas TI / Admin
                 .requestMatchers("/api/admin/users/**").hasAnyRole("TI", "ADMIN")
+                // Gerenciamento de usuários (NexoraGUsta) — TI / Admin
+                .requestMatchers("/api/user-management/**").hasAnyRole("TI", "ADMIN")
+                // Monitores — TI / Admin
+                .requestMatchers("/api/monitors/**").hasAnyRole("TI", "ADMIN")
+                // Licenças Microsoft — TI / Admin
+                .requestMatchers("/api/licenses/**").hasAnyRole("TI", "ADMIN")
+                // Cofre de senhas — autenticado
+                .requestMatchers("/api/password-vault/**").authenticated()
                 // Chamados — regras por role via @PreAuthorize nos métodos
                 .requestMatchers("/api/tickets/**").authenticated()
                 // Endpoints legados (employees, notebooks, events, sync)

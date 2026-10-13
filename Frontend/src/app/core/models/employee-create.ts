@@ -10,6 +10,8 @@ export interface EmployeeCreate {
     admissionDate?: string;
     terminationDate?: string;
     microsoftLicenses?: string[];
+    microsoftDepartment?: string;
+    state?: string;
     notebookId?: number;
     firstName?: string;
     lastName?: string;

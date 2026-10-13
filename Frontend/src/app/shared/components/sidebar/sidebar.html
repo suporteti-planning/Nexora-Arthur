@@ -61,6 +61,13 @@
       </svg>
       <span>Password Vault</span>
     </a>
+
+    <a routerLink="/backoffice/monitors" routerLinkActive="active" class="menu-item">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+      </svg>
+      <span>Monitores</span>
+    </a>
   </div>
   <div class="sidebar-resize-handle" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Redimensionar barra lateral" [attr.aria-valuemin]="minWidth" [attr.aria-valuemax]="maxWidth" [attr.aria-valuenow]="collapsed ? 68 : sidebarWidth" (pointerdown)="startResize($event)" (keydown)="resizeWithKeyboard($event)"></div>
 </aside>

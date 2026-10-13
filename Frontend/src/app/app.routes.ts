@@ -59,6 +59,9 @@ export const routes: Routes = [
       { path: 'password-vault',
         loadComponent: () =>
           import('./features/password-vault/password-vault').then(m => m.PasswordVault) },
+      { path: 'monitors',
+        loadComponent: () =>
+          import('./features/inventory/equipment-inventory/equipment-inventory').then(m => m.EquipmentInventory) },
     ],
   },
 

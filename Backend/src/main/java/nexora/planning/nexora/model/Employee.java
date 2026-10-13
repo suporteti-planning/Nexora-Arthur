@@ -30,6 +30,9 @@ public class Employee {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(name = "microsoft_id", unique = true)
+    private String microsoftId;
+
     @Column(unique = true, nullable = true)
     private String cpf;
 
