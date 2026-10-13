@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface DocStepDTO {
   id:               number;
@@ -24,7 +25,7 @@ export interface DocProcessDTO {
 
 @Injectable({ providedIn: 'root' })
 export class DocCatalogService {
-  private readonly api = 'http://localhost:8080/api/doc/catalog';
+  private readonly api = `${environment.apiUrl}/api/doc/catalog`;
 
   // Cache dos processos completos (para o formulário)
   private catalogCache$: Observable<DocProcessDTO[]> | null = null;

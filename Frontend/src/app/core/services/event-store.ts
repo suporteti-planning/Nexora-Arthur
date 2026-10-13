@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface EventStoreEvent {
   id?: number;
@@ -17,7 +18,7 @@ export interface EventStoreEvent {
 
 @Injectable({ providedIn: 'root' })
 export class EventStoreService {
-  private readonly apiUrl = 'http://localhost:8080/api/events';
+  private readonly apiUrl = `${environment.apiUrl}/api/events`;
 
   constructor(private http: HttpClient) {}
 

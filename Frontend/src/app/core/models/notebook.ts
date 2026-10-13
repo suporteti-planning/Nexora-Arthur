@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Notebook {
   id?: number;
@@ -31,7 +32,7 @@ export interface Notebook {
 
 @Injectable({ providedIn: 'root' })
 export class NotebookService {
-  private readonly apiUrl = 'http://localhost:8080/api/notebooks';
+  private readonly apiUrl = `${environment.apiUrl}/api/notebooks`;
   private notebooksCache$: Observable<Notebook[]> | null = null;
 
   constructor(private http: HttpClient) {}

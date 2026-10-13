@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export type TicketPriority   = 'BAIXA' | 'MEDIA' | 'ALTA' | 'URGENTE';
 export type TicketStatus     = 'NOVO' | 'EM_ANDAMENTO' | 'AGUARDANDO' | 'RESOLVIDO' | 'CANCELADO';
@@ -38,43 +39,44 @@ export interface UserSummary {
 }
 
 export interface DocDetailResponse {
-  processId:   number;
-  processName: string;
-  stepId:      number;
-  stepName:    string;
-  informText?: string;
+  processId:    number;
+  processName:  string;
+  stepId:       number;
+  stepName:     string;
+  informText?:  string;
   companyName?: string;
   companyCnpj?: string;
-  extraData?:  Record<string, unknown>;
+  emailDestination?: string;
+  extraData?:   Record<string, unknown>;
 }
 
 export interface HistoryEntry {
-  id:          number;
+  id:            number;
   changedByName: string;
-  fieldName?:  string;
-  oldValue?:   string;
-  newValue?:   string;
-  note?:       string;
-  changedAt:   string;
+  fieldName?:    string;
+  oldValue?:     string;
+  newValue?:     string;
+  note?:         string;
+  changedAt:     string;
 }
 
 export interface TicketResponse {
-  id:                number;
-  number:            string;
-  title:             string;
-  description?:      string;
-  priority:          TicketPriority;
-  status:            TicketStatus;
-  destDepartment:    DestDepartment;
-  destDepartmentName:string;
-  requester?:        UserSummary;
-  assignee?:         UserSummary;
-  createdAt:         string;
-  updatedAt:         string;
-  closedAt?:         string;
-  sourceRoute?:      string;
-  docDetail?:        DocDetailResponse;
-  history?:          HistoryEntry[];
+  id:                 number;
+  number:             string;
+  title:              string;
+  description?:       string;
+  priority:           TicketPriority;
+  status:             TicketStatus;
+  destDepartment:     DestDepartment;
+  destDepartmentName: string;
+  requester?:         UserSummary;
+  assignee?:          UserSummary;
+  createdAt:          string;
+  updatedAt:          string;
+  closedAt?:          string;
+  sourceRoute?:       string;
+  docDetail?:         DocDetailResponse;
+  history?:           HistoryEntry[];
 }
 
 export interface Page<T> {
@@ -86,18 +88,18 @@ export interface Page<T> {
 }
 
 export interface TicketRequest {
-  title:          string;
-  description?:   string;
-  priority:       TicketPriority;
-  destDepartment: DestDepartment;
-  sourceRoute?:   string;
+  title:           string;
+  description?:    string;
+  priority:        TicketPriority;
+  destDepartment:  DestDepartment;
+  sourceRoute?:    string;
   // DOC only
-  processId?:     number;
-  stepId?:        number;
-  companyName?:   string;
-  companyCnpj?:   string;
+  processId?:      number;
+  stepId?:         number;
+  companyName?:    string;
+  companyCnpj?:    string;
   emailDestination?: string;
-  extraData?:     Record<string, unknown>;
+  extraData?:      Record<string, unknown>;
 }
 
 export interface TicketUpdateRequest {
@@ -108,7 +110,7 @@ export interface TicketUpdateRequest {
 
 @Injectable({ providedIn: 'root' })
 export class TicketService {
-  private readonly api = 'http://localhost:8080/api/tickets';
+  private readonly api = `${environment.apiUrl}/api/tickets`;
 
   constructor(private http: HttpClient) {}
 

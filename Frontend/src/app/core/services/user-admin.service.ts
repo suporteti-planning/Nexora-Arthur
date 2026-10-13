@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export type TeamRole =
   | 'ROLE_ADMIN' | 'ROLE_TI' | 'ROLE_DOC' | 'ROLE_RH' | 'ROLE_DP'
@@ -56,7 +57,7 @@ export interface PageResponse<T> {
 
 @Injectable({ providedIn: 'root' })
 export class UserAdminService {
-  private readonly api = 'http://localhost:8080/api/admin/users';
+  private readonly api = `${environment.apiUrl}/api/admin/users`;
 
   constructor(private http: HttpClient) {}
 
@@ -77,7 +78,7 @@ export class UserAdminService {
     return this.http.put<UserAdminResponse>(`${this.api}/${id}`, req);
   }
 
-  activate(id: number):   Observable<UserAdminResponse> {
+  activate(id: number): Observable<UserAdminResponse> {
     return this.http.patch<UserAdminResponse>(`${this.api}/${id}/activate`, {});
   }
 
