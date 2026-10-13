@@ -1,0 +1,16 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #0d0d11;
+  padding: 0px;
+  height: 64px;
+  border-bottom: 2px solid #0AE18C; 
+  box-shadow: 0 4px 12px rgba(10, 225, 140, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-logo {
+  height: 100px;
+  width: auto;
+}

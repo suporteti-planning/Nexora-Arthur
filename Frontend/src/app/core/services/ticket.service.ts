@@ -1,0 +1,143 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, shareReplay } from 'rxjs';
+
+export type TicketPriority   = 'BAIXA' | 'MEDIA' | 'ALTA' | 'URGENTE';
+export type TicketStatus     = 'NOVO' | 'EM_ANDAMENTO' | 'AGUARDANDO' | 'RESOLVIDO' | 'CANCELADO';
+export type DestDepartment   = 'TI' | 'DOC' | 'RH' | 'DP' | 'FINANCEIRO' | 'RISCO';
+
+export const TICKET_STATUS_LABELS: Record<TicketStatus, string> = {
+  NOVO:          'Novo',
+  EM_ANDAMENTO:  'Em andamento',
+  AGUARDANDO:    'Aguardando',
+  RESOLVIDO:     'Resolvido',
+  CANCELADO:     'Cancelado',
+};
+
+export const TICKET_PRIORITY_LABELS: Record<TicketPriority, string> = {
+  BAIXA:   'Baixa',
+  MEDIA:   'Média',
+  ALTA:    'Alta',
+  URGENTE: 'Urgente',
+};
+
+export const DEST_DEPT_LABELS: Record<DestDepartment, string> = {
+  TI:         'TI — Tecnologia da Informação',
+  DOC:        'Documentação',
+  RH:         'Recursos Humanos / GG',
+  DP:         'Departamento Pessoal',
+  FINANCEIRO: 'Financeiro / Compras',
+  RISCO:      'Gestão de Risco',
+};
+
+export interface UserSummary {
+  id: number;
+  username: string;
+  fullName: string;
+  email: string;
+}
+
+export interface DocDetailResponse {
+  processId:   number;
+  processName: string;
+  stepId:      number;
+  stepName:    string;
+  informText?: string;
+  companyName?: string;
+  companyCnpj?: string;
+  extraData?:  Record<string, unknown>;
+}
+
+export interface HistoryEntry {
+  id:          number;
+  changedByName: string;
+  fieldName?:  string;
+  oldValue?:   string;
+  newValue?:   string;
+  note?:       string;
+  changedAt:   string;
+}
+
+export interface TicketResponse {
+  id:                number;
+  number:            string;
+  title:             string;
+  description?:      string;
+  priority:          TicketPriority;
+  status:            TicketStatus;
+  destDepartment:    DestDepartment;
+  destDepartmentName:string;
+  requester?:        UserSummary;
+  assignee?:         UserSummary;
+  createdAt:         string;
+  updatedAt:         string;
+  closedAt?:         string;
+  sourceRoute?:      string;
+  docDetail?:        DocDetailResponse;
+  history?:          HistoryEntry[];
+}
+
+export interface Page<T> {
+  content:       T[];
+  totalElements: number;
+  totalPages:    number;
+  number:        number;
+  size:          number;
+}
+
+export interface TicketRequest {
+  title:          string;
+  description?:   string;
+  priority:       TicketPriority;
+  destDepartment: DestDepartment;
+  sourceRoute?:   string;
+  // DOC only
+  processId?:     number;
+  stepId?:        number;
+  companyName?:   string;
+  companyCnpj?:   string;
+  emailDestination?: string;
+  extraData?:     Record<string, unknown>;
+}
+
+export interface TicketUpdateRequest {
+  status?:     TicketStatus;
+  assigneeId?: number;
+  note?:       string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class TicketService {
+  private readonly api = 'http://localhost:8080/api/tickets';
+
+  constructor(private http: HttpClient) {}
+
+  create(req: TicketRequest): Observable<TicketResponse> {
+    return this.http.post<TicketResponse>(this.api, req);
+  }
+
+  getMine(page = 0, size = 20): Observable<Page<TicketResponse>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<Page<TicketResponse>>(`${this.api}/mine`, { params });
+  }
+
+  getByDept(dept: DestDepartment, page = 0, size = 20): Observable<Page<TicketResponse>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<Page<TicketResponse>>(`${this.api}/dept/${dept}`, { params });
+  }
+
+  getAll(dept?: DestDepartment, status?: TicketStatus, page = 0, size = 30): Observable<Page<TicketResponse>> {
+    let params = new HttpParams().set('page', page).set('size', size);
+    if (dept)   params = params.set('dept', dept);
+    if (status) params = params.set('status', status);
+    return this.http.get<Page<TicketResponse>>(this.api, { params });
+  }
+
+  getById(id: number): Observable<TicketResponse> {
+    return this.http.get<TicketResponse>(`${this.api}/${id}`);
+  }
+
+  update(id: number, req: TicketUpdateRequest): Observable<TicketResponse> {
+    return this.http.patch<TicketResponse>(`${this.api}/${id}`, req);
+  }
+}

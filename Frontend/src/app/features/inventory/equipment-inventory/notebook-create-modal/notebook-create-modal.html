@@ -1,0 +1,27 @@
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+	<form class="modal-container" (ngSubmit)="createNotebook()">
+		<div class="modal-header">
+			<div><span class="eyebrow">Inventário de TI</span><h2>Cadastrar notebook</h2></div>
+			<button class="close-btn" type="button" aria-label="Fechar" (click)="close()">&#10005;</button>
+		</div>
+		<div class="modal-body">
+			<p class="step-description">Informe os dados do novo equipamento.</p>
+			<div class="form-grid">
+				<label class="form-group">Nome-Patrimônio*<input name="name" [(ngModel)]="formData.name" placeholder="Ex: NTB-123"></label>
+				<label class="form-group">Marca *<input name="brand" [(ngModel)]="formData.brand" placeholder="Ex: Dell"></label>
+				<label class="form-group">Modelo *<input name="model" [(ngModel)]="formData.model" placeholder="Ex: Latitude 3520"></label>
+				<label class="form-group">Número de série *<input name="serialNumber" [(ngModel)]="formData.serialNumber" placeholder="Ex: ABC123456"></label>
+				<label class="form-group">Processador *<input name="processor" [(ngModel)]="formData.processor" placeholder="Ex: Intel Core i5"></label>
+				<label class="form-group">Memória RAM *<input name="ram" [(ngModel)]="formData.ram" placeholder="Ex: 16 GB"></label>
+				<label class="form-group">Armazenamento *<input name="storage" [(ngModel)]="formData.storage" placeholder="Ex: 256 GB"></label>
+				<label class="form-group">Preço *<span class="price-input"><span class="currency-prefix">R$</span><input name="price" type="number" min="0" step="0.01" [(ngModel)]="formData.price" placeholder="0,00"></span></label>
+				<label class="form-group">Sistema operacional<input name="operatingSystem" [(ngModel)]="formData.operatingSystem" placeholder="Ex: Windows 11 Pro"></label>
+				<label class="form-group">Status *<select name="status" [(ngModel)]="formData.status"><option value="ACTIVE">Ativo</option><option value="INACTIVE">Inativo</option><option value="MAINTENANCE">Em Manutenção</option><option value="BACKUP">Backup</option><option value="REVERSE">Em coleta</option></select></label>
+				<label class="form-group">Centro de custo *<select name="costCenter" [(ngModel)]="formData.costCenter"><option value="" disabled>Selecione uma opção</option>@for (center of costCenters; track center[0]) {<option [value]="center[0]">{{ center[1] }}</option>}</select></label>
+				<label class="form-group full-width">Observações<textarea name="observations" [(ngModel)]="formData.observations" rows="3" placeholder="Informações adicionais"></textarea></label>
+			</div>
+			@if (errorMessage) { <p class="form-error">{{ errorMessage }}</p> }
+		</div>
+		<div class="modal-footer"><button class="btn-secondary" type="button" (click)="close()">Cancelar</button><button class="btn-primary" type="submit" [disabled]="!isFormValid() || isSubmitting">{{ isSubmitting ? 'Criando...' : 'Criar Notebook' }}</button></div>
+	</form>
+</div>

@@ -1,0 +1,348 @@
+<!-- Backdrop -->
+<div class="otm-backdrop" (click)="close()" aria-hidden="true"></div>
+
+<!-- Modal -->
+<div class="otm-modal" role="dialog" aria-modal="true" aria-labelledby="otm-title-label">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="otm-header">
+    <div class="otm-header-left">
+      <div class="otm-header-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <div>
+        <h2 class="otm-title" id="otm-title-label">
+          @if (currentStep() === 'base')    { Nova Solicitação }
+          @if (currentStep() === 'doc')     { Requisição de Processo — DOC }
+          @if (currentStep() === 'confirm') { Revisar e Enviar }
+        </h2>
+        <p class="otm-subtitle">
+          @if (currentStep() === 'base')    { Preencha as informações do chamado }
+          @if (currentStep() === 'doc')     { Selecione o processo e a etapa solicitada }
+          @if (currentStep() === 'confirm') { Confirme os dados antes de enviar }
+        </p>
+      </div>
+    </div>
+    <button class="otm-close" (click)="close()" aria-label="Fechar modal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ── Step indicator ──────────────────────────────────────────────────── -->
+  <div class="otm-steps" aria-label="Etapas do formulário">
+    <span class="otm-step" [class.otm-step--active]="currentStep() === 'base'"
+          [class.otm-step--done]="currentStep() === 'doc' || currentStep() === 'confirm'">
+      <span class="otm-step-num">1</span> Chamado
+    </span>
+    @if (destDept === 'DOC') {
+      <span class="otm-step-sep" aria-hidden="true">›</span>
+      <span class="otm-step" [class.otm-step--active]="currentStep() === 'doc'"
+            [class.otm-step--done]="currentStep() === 'confirm'">
+        <span class="otm-step-num">2</span> Processo DOC
+      </span>
+    }
+    <span class="otm-step-sep" aria-hidden="true">›</span>
+    <span class="otm-step" [class.otm-step--active]="currentStep() === 'confirm'">
+      <span class="otm-step-num">{{ destDept === 'DOC' ? '3' : '2' }}</span> Confirmar
+    </span>
+  </div>
+
+  <!-- ── Body ────────────────────────────────────────────────────────────── -->
+  <div class="otm-body">
+
+    <!-- ════ STEP 1: DADOS DO CHAMADO ═══════════════════════════════════════ -->
+    @if (currentStep() === 'base') {
+      <div class="otm-form">
+
+        <div class="otm-field">
+          <label class="otm-label" for="otm-f-title">
+            Título <span class="otm-req" aria-label="obrigatório">*</span>
+          </label>
+          <input id="otm-f-title" type="text" class="otm-input"
+                 [(ngModel)]="title" maxlength="200"
+                 placeholder="Descreva brevemente o que precisa" />
+        </div>
+
+        <div class="otm-field">
+          <label class="otm-label" for="otm-f-desc">Descrição</label>
+          <textarea id="otm-f-desc" class="otm-input otm-textarea" rows="3"
+                    [(ngModel)]="description"
+                    placeholder="Detalhes adicionais (opcional)"></textarea>
+        </div>
+
+        <div class="otm-row">
+          <div class="otm-field">
+            <label class="otm-label" for="otm-f-pri">
+              Prioridade <span class="otm-req" aria-label="obrigatório">*</span>
+            </label>
+            <select id="otm-f-pri" class="otm-input" [(ngModel)]="priority">
+              @for (p of priorities; track p.value) {
+                <option [value]="p.value">{{ p.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="otm-field">
+            <label class="otm-label" for="otm-f-dept">
+              Destinatário <span class="otm-req" aria-label="obrigatório">*</span>
+            </label>
+            <select id="otm-f-dept" class="otm-input"
+                    [(ngModel)]="destDept" (ngModelChange)="onDeptChange()">
+              <option value="">Selecione...</option>
+              @for (d of departments; track d.value) {
+                <option [value]="d.value">{{ d.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        @if (destDept === 'DOC') {
+          <div class="otm-doc-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span>Chamados para <strong>DOC</strong> incluem seleção de processo e etapa no próximo passo.</span>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ════ STEP 2: REQUISIÇÃO DE PROCESSO DOC ═══════════════════════════ -->
+    @if (currentStep() === 'doc') {
+      <div class="otm-form">
+
+        @if (catalogLoading) {
+          <div class="otm-loading">
+            <span class="otm-spinner" aria-hidden="true"></span>
+            <span>Carregando catálogo DOC…</span>
+          </div>
+        } @else if (catalogError) {
+          <div class="otm-error-box" role="alert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+            </svg>
+            <div>
+              <strong>Catálogo indisponível</strong>
+              <p>Não foi possível carregar os processos. Verifique a conexão com o servidor.</p>
+            </div>
+          </div>
+        } @else {
+
+          <!-- Empresa e CNPJ — sempre visíveis em chamados DOC -->
+          <div class="otm-section-label">Identificação do cliente</div>
+          <div class="otm-row">
+            <div class="otm-field">
+              <label class="otm-label" for="otm-f-company">Empresa / Cliente</label>
+              <input id="otm-f-company" type="text" class="otm-input"
+                     [(ngModel)]="companyName" placeholder="Nome da empresa ou cliente" />
+            </div>
+            <div class="otm-field">
+              <label class="otm-label" for="otm-f-cnpj">CNPJ</label>
+              <input id="otm-f-cnpj" type="text" class="otm-input"
+                     [(ngModel)]="companyCnpj" placeholder="00.000.000/0000-00" maxlength="18" />
+            </div>
+          </div>
+
+          <div class="otm-divider" aria-hidden="true"></div>
+          <div class="otm-section-label">Processo solicitado</div>
+
+          <!-- Tipo de processo -->
+          <div class="otm-field">
+            <label class="otm-label" for="otm-f-proc">
+              Tipo de processo <span class="otm-req" aria-label="obrigatório">*</span>
+            </label>
+            <select id="otm-f-proc" class="otm-input"
+                    [ngModel]="selectedProcess?.id ?? ''"
+                    (ngModelChange)="onProcessChange($event)">
+              <option value="">Selecione o processo…</option>
+              @for (p of docProcesses; track p.id) {
+                <option [value]="p.id">{{ p.name }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Etapa do processo -->
+          @if (selectedProcess) {
+            <div class="otm-field">
+              <label class="otm-label" for="otm-f-step">
+                Etapa do processo <span class="otm-req" aria-label="obrigatório">*</span>
+              </label>
+              <select id="otm-f-step" class="otm-input"
+                      [ngModel]="selectedStep?.id ?? ''"
+                      (ngModelChange)="onStepChange($event)">
+                <option value="">Selecione a etapa…</option>
+                @for (s of docSteps; track s.id) {
+                  <option [value]="s.id">{{ s.name }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <!-- Orientações da etapa (inform_text) -->
+          @if (informText) {
+            <div class="otm-inform-box" role="note" aria-label="Orientações da etapa">
+              <div class="otm-inform-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/>
+                </svg>
+                <span>Orientações — o que informar</span>
+              </div>
+              <p class="otm-inform-text">{{ informText }}</p>
+            </div>
+          }
+
+          <!-- Campo de e-mail livre (apenas etapas que exigem) -->
+          @if (needsEmail) {
+            <div class="otm-field otm-field--highlight">
+              <label class="otm-label" for="otm-f-email">
+                Endereço de e-mail de destino <span class="otm-req" aria-label="obrigatório">*</span>
+              </label>
+              <input id="otm-f-email" type="email" class="otm-input"
+                     [(ngModel)]="emailDestination"
+                     placeholder="destinatario@empresa.com"
+                     autocomplete="off" />
+              <p class="otm-field-hint">
+                Informe livremente o e-mail para esta etapa. O endereço será registrado no histórico do chamado.
+              </p>
+            </div>
+          }
+
+          <!-- Descrição adicional -->
+          @if (selectedStep) {
+            <div class="otm-field">
+              <label class="otm-label" for="otm-f-extra">Descrição da solicitação</label>
+              <textarea id="otm-f-extra" class="otm-input otm-textarea" rows="3"
+                        [(ngModel)]="extraDesc"
+                        placeholder="Detalhes, contexto ou particularidades da requisição"></textarea>
+            </div>
+          }
+
+          <!-- Aviso de documentos -->
+          @if (selectedStep?.requiresDocuments) {
+            <div class="otm-attach-notice">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+              <span>Esta etapa requer documentos. Após criar o chamado, acesse-o para anexar os arquivos necessários.</span>
+            </div>
+          }
+        }
+      </div>
+    }
+
+    <!-- ════ STEP 3: CONFIRMAÇÃO ═══════════════════════════════════════════ -->
+    @if (currentStep() === 'confirm') {
+      <div class="otm-summary">
+
+        <div class="otm-summary-row">
+          <span class="otm-summary-key">Título</span>
+          <span class="otm-summary-val">{{ title }}</span>
+        </div>
+        @if (description) {
+          <div class="otm-summary-row">
+            <span class="otm-summary-key">Descrição</span>
+            <span class="otm-summary-val">{{ description }}</span>
+          </div>
+        }
+        <div class="otm-summary-row">
+          <span class="otm-summary-key">Prioridade</span>
+          <span class="otm-summary-val">
+            <span class="otm-pri-badge otm-pri-{{ priority.toLowerCase() }}">{{ priority }}</span>
+          </span>
+        </div>
+        <div class="otm-summary-row">
+          <span class="otm-summary-key">Destinatário</span>
+          <span class="otm-summary-val">{{ departments.find(d => d.value === destDept)?.label }}</span>
+        </div>
+
+        @if (destDept === 'DOC' && selectedProcess && selectedStep) {
+          <div class="otm-summary-sep" aria-hidden="true"></div>
+          <p class="otm-summary-section">Requisição de Processo</p>
+          <div class="otm-summary-row">
+            <span class="otm-summary-key">Processo</span>
+            <span class="otm-summary-val">{{ selectedProcess.name }}</span>
+          </div>
+          <div class="otm-summary-row">
+            <span class="otm-summary-key">Etapa</span>
+            <span class="otm-summary-val">{{ selectedStep.name }}</span>
+          </div>
+          @if (companyName) {
+            <div class="otm-summary-row">
+              <span class="otm-summary-key">Empresa</span>
+              <span class="otm-summary-val">
+                {{ companyName }}{{ companyCnpj ? ' — ' + companyCnpj : '' }}
+              </span>
+            </div>
+          }
+          @if (emailDestination) {
+            <div class="otm-summary-row">
+              <span class="otm-summary-key">E-mail destino</span>
+              <span class="otm-summary-val">{{ emailDestination }}</span>
+            </div>
+          }
+          @if (extraDesc) {
+            <div class="otm-summary-row">
+              <span class="otm-summary-key">Detalhes</span>
+              <span class="otm-summary-val">{{ extraDesc }}</span>
+            </div>
+          }
+          @if (informText) {
+            <div class="otm-summary-row">
+              <span class="otm-summary-key">Orientação</span>
+              <span class="otm-summary-val otm-summary-val--muted">{{ informText }}</span>
+            </div>
+          }
+        }
+      </div>
+    }
+
+    <!-- Erro geral -->
+    @if (errorMsg) {
+      <div class="otm-error-inline" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        {{ errorMsg }}
+      </div>
+    }
+  </div>
+
+  <!-- ── Footer ──────────────────────────────────────────────────────────── -->
+  <div class="otm-footer">
+    <button class="otm-btn otm-btn--ghost" (click)="back()"
+            [disabled]="currentStep() === 'base'"
+            aria-label="Voltar ao passo anterior">
+      ← Voltar
+    </button>
+
+    <div class="otm-footer-right">
+      @if (currentStep() === 'base') {
+        <button class="otm-btn otm-btn--primary" (click)="next()">
+          {{ destDept === 'DOC' ? 'Próximo →' : 'Revisar →' }}
+        </button>
+      }
+      @if (currentStep() === 'doc') {
+        <button class="otm-btn otm-btn--primary" (click)="nextDoc()">
+          Revisar →
+        </button>
+      }
+      @if (currentStep() === 'confirm') {
+        <button class="otm-btn otm-btn--primary" (click)="submit()" [disabled]="loading">
+          @if (loading) {
+            <span class="otm-spinner otm-spinner--dark" aria-hidden="true"></span>
+            <span>Enviando…</span>
+          } @else {
+            <span>Enviar solicitação</span>
+          }
+        </button>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,363 @@
+<div class="hm-root">
+
+  <!-- ══ CANVAS BACKGROUND ═══════════════════════════════════════════════════ -->
+  <canvas #bgCanvas class="hm-canvas" aria-hidden="true"></canvas>
+
+  <!-- ══ TOPBAR ══════════════════════════════════════════════════════════════ -->
+  <header class="hm-topbar">
+    <!-- Left: logo + name -->
+    <div class="hm-topbar-brand">
+      <button class="hm-sidebar-toggle" (click)="toggleSidebar()" aria-label="Recolher menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="3" y1="6"  x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <div class="hm-brand-logo-wrap" aria-hidden="true">
+        <svg viewBox="0 0 28 28" fill="none" class="hm-brand-icon">
+          <circle cx="14" cy="14" r="12" stroke="#00FF66" stroke-width="1.5"/>
+          <line x1="14" y1="2"  x2="14" y2="6"  stroke="#00FF66" stroke-width="2" stroke-linecap="round"/>
+          <line x1="14" y1="22" x2="14" y2="26" stroke="#00FF66" stroke-width="2" stroke-linecap="round"/>
+          <line x1="2"  y1="14" x2="6"  y2="14" stroke="#00FF66" stroke-width="2" stroke-linecap="round"/>
+          <line x1="22" y1="14" x2="26" y2="14" stroke="#00FF66" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="14" cy="14" r="3" fill="#00FF66" opacity="0.9"/>
+        </svg>
+      </div>
+      <div class="hm-brand-text">
+        <span class="hm-brand-name">Nexora</span>
+        <span class="hm-brand-sub">INTRANET CORPORATIVA</span>
+      </div>
+    </div>
+
+    <!-- Center: search -->
+    <div class="hm-search-wrap">
+      <svg class="hm-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input
+        class="hm-search-input"
+        type="search"
+        placeholder="Buscar no sistema..."
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)"
+        aria-label="Buscar no sistema"
+      />
+    </div>
+
+    <!-- Right: notifications + user -->
+    <div class="hm-topbar-right">
+      <button class="hm-icon-btn" aria-label="Notificações" title="Notificações">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </button>
+
+      <div class="acct-anchor">
+        <button class="hm-user-btn"
+                (click)="toggleAccountMenu()"
+                [attr.aria-expanded]="accountMenuOpen()"
+                aria-haspopup="true"
+                aria-label="Menu da conta">
+          <div class="hm-avatar" aria-hidden="true">{{ user()?.initials ?? '?' }}</div>
+          <div class="hm-user-info">
+            <span class="hm-user-name">{{ user()?.displayName ?? 'Usuário' }}</span>
+            <span class="hm-user-role">Colaborador</span>
+          </div>
+          <svg class="hm-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+
+        @if (accountMenuOpen()) {
+          <div class="hm-dropdown" role="menu" aria-label="Menu de conta">
+            <div class="hm-dropdown-header">
+              <div class="hm-dropdown-avatar" aria-hidden="true">{{ user()?.initials ?? '?' }}</div>
+              <div class="hm-dropdown-info">
+                <span class="hm-dropdown-name">{{ user()?.displayName }}</span>
+                <span class="hm-dropdown-email">{{ user()?.email }}</span>
+              </div>
+            </div>
+            <div class="hm-dropdown-sep"></div>
+            <button class="hm-dropdown-item hm-dropdown-item--danger" role="menuitem" (click)="logout()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              Sair da conta
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ BODY ════════════════════════════════════════════════════════════════ -->
+  <div class="hm-body">
+
+    <!-- ── SIDEBAR ──────────────────────────────────────────────────────── -->
+    <aside class="hm-sidebar" [class.hm-sidebar--collapsed]="sidebarCollapsed()" aria-label="Navegação lateral">
+
+      <!-- NAVEGAÇÃO -->
+      <nav class="hm-nav-section" aria-label="Navegação principal">
+        <p class="hm-nav-label" aria-hidden="true">NAVEGAÇÃO</p>
+
+        <a routerLink="/home" routerLinkActive="hm-nav-item--active"
+           [routerLinkActiveOptions]="{ exact: true }"
+           class="hm-nav-item" aria-label="Início">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span>Início</span>
+        </a>
+
+        <a routerLink="/backoffice/dashboard" routerLinkActive="hm-nav-item--active"
+           class="hm-nav-item" aria-label="Suporte TI">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+          </svg>
+          <span>Suporte TI</span>
+        </a>
+
+        <a routerLink="/backoffice/employees" routerLinkActive="hm-nav-item--active"
+           class="hm-nav-item" aria-label="Colaboradores">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>Colaboradores</span>
+        </a>
+
+        <a routerLink="/backoffice/equipment-inventory" routerLinkActive="hm-nav-item--active"
+           class="hm-nav-item" aria-label="Inventário">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="2" y="7" width="20" height="14" rx="2"/>
+            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          </svg>
+          <span>Inventário</span>
+        </a>
+
+        <a routerLink="/backoffice/licenses" routerLinkActive="hm-nav-item--active"
+           class="hm-nav-item" aria-label="Licenças Microsoft">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/>
+            <path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20"/>
+          </svg>
+          <span>Licenças Microsoft</span>
+        </a>
+
+        <a routerLink="/backoffice/password-vault" routerLinkActive="hm-nav-item--active"
+           class="hm-nav-item" aria-label="Cofre de Senhas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="4" y="10" width="16" height="11" rx="2"/>
+            <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+            <circle cx="12" cy="15" r="1"/>
+            <path d="M12 16v2"/>
+          </svg>
+          <span>Cofre de Senhas</span>
+        </a>
+      </nav>
+
+      <!-- DEPARTAMENTOS -->
+      <nav class="hm-nav-section" aria-label="Departamentos">
+        @if (user()?.teamRole === 'ROLE_TI' || user()?.teamRole === 'ROLE_ADMIN') {
+          <p class="hm-nav-label" aria-hidden="true">ADMINISTRAÇÃO</p>
+          <a routerLink="/admin/users" routerLinkActive="hm-nav-item--active"
+             class="hm-nav-item" aria-label="Gestão de Usuários">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>Gestão de Usuários</span>
+          </a>
+        }
+        <p class="hm-nav-label" aria-hidden="true">DEPARTAMENTOS</p>
+
+        @for (item of deptNavItems; track item.label) {
+          @if (item.route) {
+            <a [routerLink]="item.route" routerLinkActive="hm-nav-item--active"
+               class="hm-nav-item hm-nav-item--dept" [attr.aria-label]="item.label" [title]="item.label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path [attr.d]="item.icon"/>
+              </svg>
+              <span>{{ item.label }}</span>
+            </a>
+          } @else {
+            <div class="hm-nav-item hm-nav-item--dept" [attr.aria-label]="item.label" [title]="item.label + ' — Em breve'">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path [attr.d]="item.icon"/>
+              </svg>
+              <span>{{ item.label }}</span>
+            </div>
+          }
+        }
+      </nav>
+
+      <!-- Sidebar footer -->
+      <div class="hm-sidebar-footer">
+        <div class="hm-sidebar-brand-card">
+          <div class="hm-sidebar-brand-logo" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="#00FF66" stroke-width="1.5"/>
+              <circle cx="10" cy="10" r="3" fill="#00FF66" opacity="0.85"/>
+            </svg>
+          </div>
+          <div class="hm-sidebar-brand-text">
+            <span class="hm-sidebar-brand-name">Nexora</span>
+            <span class="hm-sidebar-brand-tagline">Conectando pessoas,<br>processos e resultados.</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── MAIN CONTENT ──────────────────────────────────────────────────── -->
+    <main class="hm-content" aria-label="Conteúdo principal">
+
+      <!-- Page header -->
+      <div class="hm-page-header">
+        <div>
+          <p class="hm-page-label">Home</p>
+          <h1 class="hm-page-title">Visão geral</h1>
+        </div>
+        <div class="hm-page-header-right">
+          <p class="hm-page-date">{{ todayDate }}</p>
+          <button class="hm-open-ticket-btn" (click)="openTicketModal()" aria-label="Abrir chamado">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            Abrir Chamado
+          </button>
+        </div>
+      </div>
+
+      <!-- Ticket success toast -->
+      @if (ticketCreated()) {
+        <div class="hm-ticket-toast" role="status" aria-live="polite">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+          </svg>
+          Chamado <strong>{{ ticketCreated() }}</strong> aberto com sucesso!
+        </div>
+      }
+
+      <!-- Stats row -->
+      <div class="hm-stats-row" role="list" aria-label="Indicadores de inventário">
+        @if (loading()) {
+          @for (_ of [1,2,3,4,5]; track $index) {
+            <div class="hm-stat-card hm-stat-card--skeleton" role="listitem" aria-busy="true"></div>
+          }
+        } @else {
+          @for (stat of stats(); track stat.key) {
+            <div class="hm-stat-card" role="listitem">
+              <div class="hm-stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                  <path [attr.d]="stat.icon"/>
+                </svg>
+              </div>
+              <div class="hm-stat-body">
+                <span class="hm-stat-label">{{ stat.label }}</span>
+                <span class="hm-stat-value" aria-label="{{ stat.label }}: {{ stat.value }}">{{ stat.value }}</span>
+              </div>
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Operational queue -->
+      <section class="hm-section" aria-label="Fila operacional">
+        <div class="hm-section-header">
+          <div class="hm-section-title-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            </svg>
+            <h2 class="hm-section-title">
+              FILA OPERACIONAL
+              @if (!loading() && !loadError()) {
+                <span class="hm-section-badge">{{ attentionItems().length }}</span>
+              }
+            </h2>
+          </div>
+          <p class="hm-section-sub">Equipamentos que precisam de atenção</p>
+        </div>
+
+        @if (loading()) {
+          <div class="hm-queue-loading" aria-live="polite" aria-busy="true">
+            <span class="hm-spinner" aria-hidden="true"></span>
+            <span>Carregando inventário…</span>
+          </div>
+        } @else if (loadError()) {
+          <div class="hm-queue-error" role="alert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <p>Não foi possível carregar o resumo operacional.</p>
+            <button class="hm-btn-retry" (click)="retryLoad()">Tentar novamente</button>
+          </div>
+        } @else if (attentionItems().length === 0) {
+          <div class="hm-queue-empty" role="status">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+            </svg>
+            <p>Nenhum equipamento requer atenção no momento.</p>
+          </div>
+        } @else {
+          <div class="hm-queue-table-wrap">
+            <table class="hm-queue-table" aria-label="Equipamentos com atenção">
+              <thead>
+                <tr>
+                  <th scope="col">Equipamento</th>
+                  <th scope="col">Descrição</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of attentionItems(); track item.id) {
+                  <tr class="hm-queue-row">
+                    <td class="hm-queue-name">{{ item.name }}</td>
+                    <td class="hm-queue-desc">{{ item.description }}</td>
+                    <td>
+                      <span class="hm-status-badge" [class]="item.statusClass">{{ item.statusLabel }}</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+
+      <!-- Tickets section (structural — no API exists yet) -->
+      <section class="hm-section" aria-label="Chamados recentes">
+        <div class="hm-section-header">
+          <div class="hm-section-title-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <h2 class="hm-section-title">CHAMADOS RECENTES</h2>
+          </div>
+        </div>
+        <div class="hm-tickets-empty" role="status">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/>
+          </svg>
+          <p>Integração de chamados em desenvolvimento.</p>
+          <span class="hm-tickets-sub">Os chamados aparecerão aqui quando o módulo estiver disponível.</span>
+        </div>
+      </section>
+
+    </main>
+  </div><!-- /hm-body -->
+</div><!-- /hm-root -->
+
+<!-- ══ TICKET MODAL ═══════════════════════════════════════════════════════════ -->
+@if (showTicketModal()) {
+  <app-open-ticket-modal
+    (closed)="closeTicketModal()"
+    (created)="onTicketCreated($event)"
+  ></app-open-ticket-modal>
+}

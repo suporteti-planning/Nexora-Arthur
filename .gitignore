@@ -1,0 +1,40 @@
+# ── Node / Angular ────────────────────────────────────────────────────────
+node_modules/
+dist/
+.angular/
+Frontend/dist/
+Frontend/.angular/
+Frontend/node_modules/
+
+# ── Java / Maven ──────────────────────────────────────────────────────────
+Backend/target/
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+.mvn/wrapper/maven-wrapper.jar
+
+# ── Ambiente / Segredos ───────────────────────────────────────────────────
+# .env contém credenciais reais — NÃO subir
+.env
+.env.dev
+.env.prod
+# .env.example pode ser commitado (sem valores reais)
+
+# ── IDEs ──────────────────────────────────────────────────────────────────
+.idea/
+.vscode/settings.json
+*.suo
+*.user
+.DS_Store
+Thumbs.db
+
+# ── Logs ──────────────────────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+
+# ── Testes / coverage ─────────────────────────────────────────────────────
+coverage/
+.nyc_output/

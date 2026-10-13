@@ -1,0 +1,415 @@
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>Sobre o Colaborador</h2>
+      <button class="close-btn" (click)="close()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Informações Pessoais -->
+      <div class="info-section">
+        <div class="section-header">
+          <h3>Informações Pessoais</h3>
+        </div>
+        <div class="info-grid">
+          <!-- Nome -->
+          <div class="info-item" [class.editing]="editingField === 'name'">
+            <span class="label">Nome</span>
+            <div class="value-wrapper">
+              <span *ngIf="editingField !== 'name'" class="value">{{ employee?.name }}</span>
+              <input *ngIf="editingField === 'name'" 
+                     [(ngModel)]="editData.name" 
+                     class="edit-input" 
+                     (keydown.enter)="saveField('name')"
+                     (keydown.escape)="cancelEdit()"
+                     autofocus>
+              <button class="edit-btn" (click)="startEdit('name')" *ngIf="editingField !== 'name'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+              </button>
+              <div class="edit-actions" *ngIf="editingField === 'name'">
+                <button class="save-btn" (click)="saveField('name')">✓</button>
+                <button class="cancel-btn" (click)="cancelEdit()">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="info-item" [class.editing]="editingField === 'email'">
+            <span class="label">Email</span>
+            <div class="value-wrapper">
+              <span *ngIf="editingField !== 'email'" class="value">{{ employee?.email }}</span>
+              <input *ngIf="editingField === 'email'" 
+                     [(ngModel)]="editData.email" 
+                     class="edit-input" 
+                     type="email"
+                     (keydown.enter)="saveField('email')"
+                     (keydown.escape)="cancelEdit()"
+                     autofocus>
+              <button class="edit-btn" (click)="startEdit('email')" *ngIf="editingField !== 'email'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+              </button>
+              <div class="edit-actions" *ngIf="editingField === 'email'">
+                <button class="save-btn" (click)="saveField('email')">✓</button>
+                <button class="cancel-btn" (click)="cancelEdit()">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- CPF -->
+          <div class="info-item" [class.editing]="editingField === 'cpf'">
+            <span class="label">CPF</span>
+            <div class="value-wrapper">
+              <span *ngIf="editingField !== 'cpf'" class="value">{{ employee?.cpf }}</span>
+              <input *ngIf="editingField === 'cpf'" 
+                     [(ngModel)]="editData.cpf" 
+                     class="edit-input" 
+                     (keydown.enter)="saveField('cpf')"
+                     (keydown.escape)="cancelEdit()"
+                     autofocus>
+              <button class="edit-btn" (click)="startEdit('cpf')" *ngIf="editingField !== 'cpf'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+              </button>
+              <div class="edit-actions" *ngIf="editingField === 'cpf'">
+                <button class="save-btn" (click)="saveField('cpf')">✓</button>
+                <button class="cancel-btn" (click)="cancelEdit()">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="info-item" [class.editing]="editingField === 'status'">
+            <span class="label">Status</span>
+            <div class="value-wrapper">
+              <span *ngIf="editingField !== 'status'" class="value">
+                <span class="status-badge" [class.active]="employee?.status === 'ACTIVE'" [class.inactive]="employee?.status === 'INACTIVE'">
+                  {{ employee?.status === 'ACTIVE' ? 'Ativo' : employee?.status === 'INACTIVE' ? 'Inativo' : employee?.status || 'Não informado' }}
+                </span>
+              </span>
+              <select *ngIf="editingField === 'status'" 
+                      [(ngModel)]="editData.status" 
+                      class="edit-select"
+                      (change)="saveField('status')"
+                      (keydown.escape)="cancelEdit()"
+                      autofocus>
+                <option value="ACTIVE">Ativo</option>
+                <option value="INACTIVE">Inativo</option>
+              </select>
+              <button class="edit-btn" (click)="startEdit('status')" *ngIf="editingField !== 'status'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+              </button>
+              <div class="edit-actions" *ngIf="editingField === 'status'">
+                <button class="save-btn" (click)="saveField('status')">✓</button>
+                <button class="cancel-btn" (click)="cancelEdit()">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informações Profissionais -->
+      <div class="info-section">
+        <div class="section-header">
+          <h3>Informações Profissionais</h3>
+        </div>
+        <div class="info-grid">
+          <!-- Cargo -->
+          <div class="info-item" [class.editing]="editingField === 'position'">
+            <span class="label">Cargo</span>
+            <div class="value-wrapper">
+              <span *ngIf="editingField !== 'position'" class="value">{{ employee?.position }}</span>
+              <input *ngIf="editingField === 'position'" 
+                     [(ngModel)]="editData.position" 
+                     class="edit-input" 
+                     (keydown.enter)="saveField('position')"
+                     (keydown.escape)="cancelEdit()"
+                     autofocus>
+              <button class="edit-btn" (click)="startEdit('position')" *ngIf="editingField !== 'position'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+              </button>
+              <div class="edit-actions" *ngIf="editingField === 'position'">
+                <button class="save-btn" (click)="saveField('position')">✓</button>
+                <button class="cancel-btn" (click)="cancelEdit()">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Departamento -->
+          <div class="info-item" [class.editing]="editingField === 'department'">
+            <span class="label">Departamento</span>
+            <div class="value-wrapper">
+              <span *ngIf="editingField !== 'department'" class="value">{{ employee?.department }}</span>
+              <input *ngIf="editingField === 'department'" 
+                     [(ngModel)]="editData.department" 
+                     class="edit-input" 
+                     (keydown.enter)="saveField('department')"
+                     (keydown.escape)="cancelEdit()"
+                     autofocus>
+              <button class="edit-btn" (click)="startEdit('department')" *ngIf="editingField !== 'department'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+              </button>
+              <div class="edit-actions" *ngIf="editingField === 'department'">
+                <button class="save-btn" (click)="saveField('department')">✓</button>
+                <button class="cancel-btn" (click)="cancelEdit()">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Líder -->
+          <div class="info-item" [class.editing]="editingField === 'leader'">
+            <span class="label">Líder</span>
+            <div class="value-wrapper">
+              <span *ngIf="editingField !== 'leader'" class="value">{{ employee?.leader }}</span>
+              <input *ngIf="editingField === 'leader'" 
+                     [(ngModel)]="editData.leader" 
+                     class="edit-input" 
+                     (keydown.enter)="saveField('leader')"
+                     (keydown.escape)="cancelEdit()"
+                     autofocus>
+              <button class="edit-btn" (click)="startEdit('leader')" *ngIf="editingField !== 'leader'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+              </button>
+              <div class="edit-actions" *ngIf="editingField === 'leader'">
+                <button class="save-btn" (click)="saveField('leader')">✓</button>
+                <button class="cancel-btn" (click)="cancelEdit()">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Centro de Custo -->
+          <div class="info-item" [class.editing]="editingField === 'costCenter'">
+            <span class="label">Centro de Custo</span>
+            <div class="value-wrapper">
+              <span *ngIf="editingField !== 'costCenter'" class="value">{{ employee?.costCenter || 'Não informado' }}</span>
+              <input *ngIf="editingField === 'costCenter'" 
+                     [(ngModel)]="editData.costCenter" 
+                     class="edit-input" 
+                     (keydown.enter)="saveField('costCenter')"
+                     (keydown.escape)="cancelEdit()"
+                     autofocus>
+              <button class="edit-btn" (click)="startEdit('costCenter')" *ngIf="editingField !== 'costCenter'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+              </button>
+              <div class="edit-actions" *ngIf="editingField === 'costCenter'">
+                <button class="save-btn" (click)="saveField('costCenter')">✓</button>
+                <button class="cancel-btn" (click)="cancelEdit()">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data de Admissão -->
+          <div class="info-item" [class.editing]="editingField === 'admissionDate'">
+            <span class="label">Data de Admissão</span>
+            <div class="value-wrapper">
+              <span *ngIf="editingField !== 'admissionDate'" class="value">
+                {{ employee?.admissionDate ? (employee.admissionDate | date:'dd/MM/yyyy') : 'Não informada' }}
+              </span>
+              <input *ngIf="editingField === 'admissionDate'" 
+                     [(ngModel)]="editData.admissionDate" 
+                     class="edit-input" 
+                     type="date"
+                     (keydown.enter)="saveField('admissionDate')"
+                     (keydown.escape)="cancelEdit()"
+                     autofocus>
+              <button class="edit-btn" (click)="startEdit('admissionDate')" *ngIf="editingField !== 'admissionDate'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+              </button>
+              <div class="edit-actions" *ngIf="editingField === 'admissionDate'">
+                <button class="save-btn" (click)="saveField('admissionDate')">✓</button>
+                <button class="cancel-btn" (click)="cancelEdit()">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data de Desligamento -->
+          <div class="info-item" [class.editing]="editingField === 'terminationDate'">
+            <span class="label">Data de Desligamento</span>
+            <div class="value-wrapper">
+              <span *ngIf="editingField !== 'terminationDate'" class="value">
+                {{ employee?.terminationDate ? (employee.terminationDate | date:'dd/MM/yyyy') : 'Não informada' }}
+              </span>
+              <input *ngIf="editingField === 'terminationDate'" 
+                     [(ngModel)]="editData.terminationDate" 
+                     class="edit-input" 
+                     type="date"
+                     (keydown.enter)="saveField('terminationDate')"
+                     (keydown.escape)="cancelEdit()"
+                     autofocus>
+              <button class="edit-btn" (click)="startEdit('terminationDate')" *ngIf="editingField !== 'terminationDate'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+              </button>
+              <div class="edit-actions" *ngIf="editingField === 'terminationDate'">
+                <button class="save-btn" (click)="saveField('terminationDate')">✓</button>
+                <button class="cancel-btn" (click)="cancelEdit()">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Licenças Microsoft -->
+      <div class="info-section">
+        <div class="section-header">
+          <h3>Licenças Microsoft</h3>
+          <button class="section-action" type="button" (click)="startEdit('microsoftLicenses')">
+            {{ editingLicenses ? 'Cancelar' : 'Editar licenças' }}
+          </button>
+        </div>
+        @if (editingLicenses) {
+          <div class="licenses-edit-grid">
+            @for (license of availableLicenses; track license.value) {
+              <label class="license-option">
+                <input type="checkbox" [checked]="isLicenseSelected(license.value)" (change)="toggleLicense(license.value)">
+                <span>{{ license.label }}</span>
+              </label>
+            }
+          </div>
+          <div class="license-edit-actions">
+            <button class="btn-secondary" type="button" (click)="cancelEdit()">Cancelar</button>
+            <button class="btn-primary" type="button" [disabled]="isSaving" (click)="saveField('microsoftLicenses')">Salvar licenças</button>
+          </div>
+        } @else {
+          <div class="licenses-container">
+            @for (license of employee?.microsoftLicenses || []; track license) {
+              <span class="license-badge">{{ getLicenseLabel(license) }}</span>
+            } @empty {
+              <span class="value">Nenhuma licença informada</span>
+            }
+          </div>
+          <div class="license-history">
+            <h4>Últimas alterações</h4>
+            @for (entry of licenseHistory; track entry.changedAt) {
+              <div class="history-entry">
+                <time>{{ entry.changedAt | date:'dd/MM/yyyy HH:mm' }}</time>
+                <span>{{ formatLicenses(entry.licenses) }}</span>
+              </div>
+            } @empty {
+              <span class="history-empty">Nenhuma alteração registrada neste navegador.</span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Informações do Notebook -->
+      @if (employee?.notebook) {
+        <div class="info-section">
+          <div class="section-header">
+            <h3>Informações do Notebook</h3>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Nome</span>
+              <div class="value-wrapper"><span class="value">{{ employee?.notebook?.name || 'Não informado' }}</span><button class="copy-btn" type="button" (click)="copyNotebookInfo('name', employee?.notebook?.name)" [attr.aria-label]="copiedField === 'name' ? 'Copiado' : 'Copiar nome'">{{ copiedField === 'name' ? 'Copiado' : 'Copiar' }}</button></div>
+            </div>
+
+            <div class="info-item">
+              <span class="label">Marca</span>
+              <div class="value-wrapper">
+                <span class="value">{{ employee?.notebook?.brand || 'Não informado' }}</span><button class="copy-btn" type="button" (click)="copyNotebookInfo('brand', employee?.notebook?.brand)">Copiar</button>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <span class="label">Modelo</span>
+              <div class="value-wrapper">
+                <span class="value">{{ employee?.notebook?.model || 'Não informado' }}</span><button class="copy-btn" type="button" (click)="copyNotebookInfo('model', employee?.notebook?.model)">Copiar</button>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <span class="label">Número de Série</span>
+              <div class="value-wrapper">
+                <span class="value">{{ employee?.notebook?.serialNumber || 'Não informado' }}</span><button class="copy-btn" type="button" (click)="copyNotebookInfo('serial', employee?.notebook?.serialNumber)">Copiar</button>
+              </div>
+            </div>
+
+            <!-- Status do Notebook -->
+            <div class="info-item">
+              <span class="label">Status</span>
+              <div class="value-wrapper">
+                <span class="value">
+                  <span class="status-badge" [class.active]="employee?.notebook?.status === 'ACTIVE'" [class.inactive]="employee?.notebook?.status === 'INACTIVE'" [class.backup]="employee?.notebook?.status === 'BACKUP'" [class.reverse]="employee?.notebook?.status === 'REVERSE'">
+                    {{ employee?.notebook?.status === 'ACTIVE' ? 'Ativo' : employee?.notebook?.status === 'INACTIVE' ? 'Inativo' : employee?.notebook?.status === 'MAINTENANCE' ? 'Em Manutenção' : employee?.notebook?.status === 'BACKUP' ? 'Backup' : employee?.notebook?.status === 'REVERSE' ? 'Em coleta' : employee?.notebook?.status || 'Não informado' }}
+                  </span>
+                </span>
+                <button class="copy-btn" type="button" (click)="copyNotebookInfo('status', employee?.notebook?.status)">Copiar</button>
+              </div>
+            </div>
+
+            <!-- Observações -->
+            @if (employee?.notebook?.observations) {
+              <div class="info-item full-width">
+                <span class="label">Observações</span>
+                <div class="value-wrapper">
+                  <span class="value">{{ employee?.notebook?.observations }}</span>
+                  <button class="copy-btn" type="button" (click)="copyNotebookInfo('observations', employee?.notebook?.observations)">Copiar</button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Mensagens de Feedback -->
+      @if (isSaving) {
+        <div class="message-saving">
+          <span>Salvando...</span>
+        </div>
+      }
+      @if (saveSuccess) {
+        <div class="message-success">
+          <span>✓ Alterações salvas com sucesso!</span>
+        </div>
+      }
+      @if (saveError) {
+        <div class="message-error">
+          <span>✕ {{ errorMessage }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="close()">Fechar</button>
+    </div>
+
+    <div class="confirmation-overlay" *ngIf="statusConfirmationPending" (click)="cancelStatusChange()">
+      <section class="confirmation-modal" role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
+        <h2>Confirmar inativação</h2>
+        <p>Ao inativar este empregado, as seguintes operações serão realizadas:</p>
+        <ul>
+          <li>Bloqueio de entrada da Microsoft</li>
+          <li>Alteração do nome de exibição para Inativo</li>
+          <li>Alteração da foto de perfil</li>
+        </ul>
+        <div class="confirmation-actions">
+          <button type="button" class="btn-secondary" (click)="cancelStatusChange()">Cancelar</button>
+          <button type="button" class="btn-danger" (click)="confirmStatusChange()">Inativar empregado</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

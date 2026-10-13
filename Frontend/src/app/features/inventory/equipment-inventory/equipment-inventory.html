@@ -1,0 +1,140 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-titles">
+      <span class="eyebrow">Parque de equipamentos</span>
+      <h2>Inventário de Equipamentos</h2>
+    </div>
+    <button class="btn-primary" type="button" (click)="openCreateModal()">
+      <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span>Cadastrar Notebook</span>
+    </button>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <span class="kpi-label">Total de Ativos</span>
+      <span class="kpi-value">{{ notebooks.length }}</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Em Uso</span>
+      <span class="kpi-value success">
+        {{ countByStatus('ACTIVE') }}
+      </span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Em Estoque</span>
+      <span class="kpi-value info">
+        {{ countByStatus('INACTIVE') }}
+      </span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Em Manutenção</span>
+      <span class="kpi-value warning">
+        {{ countByStatus('MAINTENANCE') }}
+      </span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Backup</span>
+      <span class="kpi-value info">
+        {{ countByStatus('BACKUP') }}
+      </span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Em coleta</span>
+      <span class="kpi-value warning">
+        {{ countByStatus('REVERSE') }}
+      </span>
+    </div>
+  </div>
+
+  <section class="card table-card">
+    <div class="table-actions">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Buscar por nome, modelo, série ou responsável..." 
+          [(ngModel)]="searchTerm" 
+        />
+      </div>
+
+      <div class="filter-box">
+        <select [(ngModel)]="statusFilter">
+          <option value="">Todos os Status</option>
+          <option value="ACTIVE">Ativo</option>
+          <option value="INACTIVE">Inativo</option>
+          <option value="MAINTENANCE">Em Manutenção</option>
+          <option value="BACKUP">Backup</option>
+          <option value="REVERSE">Em coleta</option>
+        </select>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Notebook</th>
+          <th>Número de Série</th>
+          <th>Centro de Custo</th>
+          <th>Responsável</th>
+          <th>Status</th>
+          <th> </th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading) {
+          <tr><td colspan="6" class="empty-state">Carregando notebooks...</td></tr>
+        } @else if (errorMessage) {
+          <tr><td colspan="6" class="empty-state error-state">{{ errorMessage }}</td></tr>
+        } @else {
+        @for (item of filteredNotebooks; track item.id) {
+          <tr>
+            <td>
+              <div class="equipment-info">
+                <span class="equipment-name">{{ item.name }}</span>
+                <span class="equipment-sn">{{ item.brand }} {{ item.model }}</span>
+              </div>
+            </td>
+            <td><span class="patrimony-tag">{{ item.serialNumber }}</span></td>
+            <td>{{ getCostCenterLabel(item.costCenter) }}</td>
+            <td>{{ item.employee?.name || 'Disponível' }}</td>
+            <td>
+              <span [class]="'status-badge ' + getStatusClass(item.status)">
+                {{ getStatusLabel(item.status) }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button class="btn-details" type="button" (click)="$event.stopPropagation(); openAboutModal(item)">Detalhes</button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="empty-state">Nenhum equipamento encontrado.</td>
+          </tr>
+        }
+        }
+      </tbody>
+    </table>
+  </section>
+</div>
+
+@if (showCreateModal) {
+  <app-notebook-create-modal
+    (closeModal)="closeCreateModal()"
+    (notebookCreated)="onNotebookCreated($event)"
+  />
+}
+
+@if (showAboutModal) {
+  <app-notebook-about-modal
+    [notebook]="selectedNotebook"
+    (closeModal)="closeAboutModal()"
+    (notebookUpdated)="onNotebookUpdated($event)"
+  />
+}

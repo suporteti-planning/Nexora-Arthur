@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexora-backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env.dev  # Carrega as variáveis do arquivo .env.dev
+    # OU para produção:
+    # env_file:
+    #   - .env.prod
+    depends_on:
+      - postgres
+    networks:
+      - nexora-network
+    volumes:
+      - ./logs:/app/logs  # Para persistir logs
+
+app:
+  dev:
+    username: ${APP_DEV_USERNAME:admin}
+    password: ${APP_DEV_PASSWORD:admin}
+    role: ${APP_DEV_ROLE:ROLE_ADMIN}
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:nexora_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+
+  postgres:
+    image: postgres:15
+    container_name: nexora-postgres
+    environment:
+      - POSTGRES_DB=${DB_NAME:-nexora}
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - nexora-network
+
+volumes:
+  postgres_data:
+
+networks:
+  nexora-network:
+    driver: bridge

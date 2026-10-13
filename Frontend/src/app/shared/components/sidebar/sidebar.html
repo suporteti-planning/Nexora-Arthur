@@ -1,0 +1,66 @@
+<aside class="sidebar" [class.collapsed]="collapsed" [class.resizing]="resizing" [style.width.px]="collapsed ? 68 : sidebarWidth">
+  <div class="sidebar-header">
+    <span class="sidebar-heading" *ngIf="!collapsed">NAVEGAÇÃO</span>
+    <button type="button" class="sidebar-toggle" (click)="toggleSidebar()" [attr.aria-label]="collapsed ? 'Abrir barra lateral' : 'Contrair barra lateral'" [title]="collapsed ? 'Abrir barra lateral' : 'Contrair barra lateral'">
+      <svg *ngIf="!collapsed" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/><path d="M4 3.5h12v13H4z"/></svg>
+      <svg *ngIf="collapsed" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m7.5 4.5 5.5 5.5-5.5 5.5"/><path d="M4 3.5h12v13H4z"/></svg>
+    </button>
+  </div>
+  <div class="sidebar-menu">
+    <a routerLink="/home" class="menu-item menu-item--intranet" title="Voltar à Intranet">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span>Intranet</span>
+    </a>
+
+    <div class="sidebar-separator" *ngIf="!collapsed"><span>TI — Backoffice</span></div>
+
+    <a routerLink="/backoffice/dashboard" routerLinkActive="active" class="menu-item">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+
+    <a routerLink="/backoffice/employees" routerLinkActive="active" class="menu-item">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+      <span>Colaboradores</span>
+    </a>
+
+    <a routerLink="/backoffice/equipment-inventory" routerLinkActive="active" class="menu-item">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+      </svg>
+      <span>Inventário</span>
+    </a>
+
+    <a routerLink="/backoffice/licenses" routerLinkActive="active" class="menu-item">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"></path>
+        <path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20M8 7h8M8 10h6"></path>
+      </svg>
+      <span>Licenças</span>
+    </a>
+
+    <a routerLink="/backoffice/password-vault" routerLinkActive="active" class="menu-item">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="4" y="10" width="16" height="11" rx="2"></rect>
+        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+        <circle cx="12" cy="15" r="1"></circle>
+        <path d="M12 16v2"></path>
+      </svg>
+      <span>Password Vault</span>
+    </a>
+  </div>
+  <div class="sidebar-resize-handle" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Redimensionar barra lateral" [attr.aria-valuemin]="minWidth" [attr.aria-valuemax]="maxWidth" [attr.aria-valuenow]="collapsed ? 68 : sidebarWidth" (pointerdown)="startResize($event)" (keydown)="resizeWithKeyboard($event)"></div>
+</aside>

@@ -1,0 +1,277 @@
+<div class="login-root">
+
+  <!-- ══ INTRO ANIMATION — fica na frente até terminar ═══════════════════════ -->
+  @if (showIntro()) {
+    <app-intro-animation
+      [skip]="skipIntro"
+      (done)="onIntroDone()"
+    ></app-intro-animation>
+  }
+
+  <!-- ══ LOGIN SHELL — visível após a intro ══════════════════════════════════ -->
+  <div
+    class="login-shell"
+    [class.login-shell--hidden]="showIntro()"
+    #loginShell
+  >
+    <!-- Canvas ondas de partículas -->
+    <canvas #bgCanvas class="login-canvas" aria-hidden="true"></canvas>
+
+    <!-- ── LEFT PANEL ──────────────────────────────────────────────────── -->
+    <aside class="left-panel" #leftPanel aria-hidden="true">
+      <div class="left-content">
+
+        <div class="brand-badge">
+          <span class="badge-dot"></span>
+          <span>Intranet Corporativa</span>
+        </div>
+
+        <h1 class="brand-headline">
+          <span class="headline-accent">NEXORA</span>-PLANNING
+        </h1>
+
+        <div class="brand-logo-wrap">
+          <img
+            src="assets/images/Planning-Logo-principal-colorida-transparente.png"
+            alt="Planning"
+            class="brand-logo-img"
+            width="340" height="80"
+          />
+        </div>
+
+        <p class="brand-sub">
+          Acesso centralizado a departamentos,<br>
+          ferramentas e informações da empresa.
+        </p>
+
+        <div class="feature-list">
+          <div class="feature-item">
+            <span class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 12l2 2 4-4"/>
+                <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+              </svg>
+            </span>
+            <span>Controle de acessos e permissões</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"/>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </span>
+            <span>Gestão de colaboradores e inventário</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18M9 21V9"/>
+              </svg>
+            </span>
+            <span>Módulos por departamento</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── RIGHT PANEL ─────────────────────────────────────────────────── -->
+    <main class="right-panel">
+      <div class="form-card" #formCard>
+
+        <!-- Logo mobile -->
+        <div class="form-logo-mobile" #logoRef>
+          <img
+            src="assets/images/Planning-Logo-principal-colorida-transparente.png"
+            alt="Planning"
+            class="form-logo-mobile-img"
+            width="200" height="48"
+          />
+        </div>
+
+        <!-- ── LOGIN ──────────────────────────────────────────────────── -->
+        @if (isLogin()) {
+          <div class="form-header">
+            <h2 class="form-title">ACESSE SUA INTRANET</h2>
+            <p class="form-subtitle">Entre com suas credenciais para continuar</p>
+          </div>
+
+          <form class="auth-form" (ngSubmit)="onLogin()" novalidate autocomplete="on">
+            <div class="login-field field-group">
+              <label class="field-label" for="username">Usuário ou e-mail</label>
+              <input
+                id="username" type="text" class="field-input"
+                [(ngModel)]="username" name="username"
+                placeholder="seu.usuario" autocomplete="username"
+                [class.field-error]="errorMsg && !username.trim()"
+              />
+            </div>
+
+            <div class="login-field field-group">
+              <label class="field-label" for="password">Senha</label>
+              <div class="password-wrapper">
+                <input
+                  id="password" [type]="showPassword ? 'text' : 'password'"
+                  class="field-input password-input"
+                  [(ngModel)]="password" name="password"
+                  placeholder="••••••••" autocomplete="current-password"
+                  [class.field-error]="errorMsg && !password"
+                />
+                <button type="button" class="password-toggle"
+                  (click)="togglePassword()"
+                  [attr.aria-label]="showPassword ? 'Ocultar senha' : 'Mostrar senha'">
+                  @if (showPassword) {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  }
+                </button>
+              </div>
+            </div>
+
+            @if (errorMsg) {
+              <div class="login-field alert alert-error" role="alert">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="alert-icon">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>{{ errorMsg }}</span>
+              </div>
+            }
+
+            <div class="login-field">
+              <button type="submit" class="btn-primary" [disabled]="loading">
+                @if (loading) {
+                  <span class="btn-spinner" aria-hidden="true"></span>
+                  <span>Entrando…</span>
+                } @else {
+                  <span>ENTRAR</span>
+                }
+              </button>
+            </div>
+
+            <div class="login-field form-footer">
+              <span class="footer-text">Ainda não tem acesso?</span>
+              <button type="button" class="link-btn" (click)="setMode('register')">
+                Criar conta de demonstração
+              </button>
+            </div>
+          </form>
+        }
+
+        <!-- ── CADASTRO ────────────────────────────────────────────────── -->
+        @if (isRegister()) {
+          <div class="form-header">
+            <h2 class="form-title">CRIAR CONTA</h2>
+            <p class="form-subtitle">Cadastro para acesso de demonstração</p>
+          </div>
+
+          <form class="auth-form" (ngSubmit)="onRegister()" novalidate autocomplete="on">
+            <div class="login-field field-group">
+              <label class="field-label" for="reg-name">Nome completo</label>
+              <input id="reg-name" type="text" class="field-input"
+                [(ngModel)]="regName" name="regName"
+                placeholder="Seu nome" autocomplete="name" />
+            </div>
+
+            <div class="login-field field-group">
+              <label class="field-label" for="reg-email">E-mail</label>
+              <input id="reg-email" type="email" class="field-input"
+                [(ngModel)]="regEmail" name="regEmail"
+                placeholder="seu@email.com" autocomplete="email" />
+            </div>
+
+            <div class="login-field field-group">
+              <label class="field-label" for="reg-password">Senha</label>
+              <div class="password-wrapper">
+                <input id="reg-password"
+                  [type]="showRegPassword ? 'text' : 'password'"
+                  class="field-input password-input"
+                  [(ngModel)]="regPassword" name="regPassword"
+                  placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+                <button type="button" class="password-toggle"
+                  (click)="toggleRegPassword()"
+                  aria-label="Alternar visibilidade da senha">
+                  @if (showRegPassword) {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  }
+                </button>
+              </div>
+            </div>
+
+            <div class="login-field field-group">
+              <label class="field-label" for="reg-confirm">Confirmar senha</label>
+              <input id="reg-confirm" type="password" class="field-input"
+                [(ngModel)]="regConfirm" name="regConfirm"
+                placeholder="Repita a senha" autocomplete="new-password" />
+            </div>
+
+            @if (errorMsg) {
+              <div class="login-field alert alert-error" role="alert">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="alert-icon">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>{{ errorMsg }}</span>
+              </div>
+            }
+
+            @if (successMsg) {
+              <div class="login-field alert alert-success" role="status">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="alert-icon">
+                  <path d="M9 12l2 2 4-4"/>
+                  <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <span>{{ successMsg }}</span>
+              </div>
+            }
+
+            <div class="login-field">
+              <button type="submit" class="btn-primary" [disabled]="loading">
+                @if (loading) {
+                  <span class="btn-spinner" aria-hidden="true"></span>
+                  <span>Cadastrando…</span>
+                } @else {
+                  <span>CRIAR CONTA</span>
+                }
+              </button>
+            </div>
+
+            <div class="login-field form-footer">
+              <span class="footer-text">Já tem acesso?</span>
+              <button type="button" class="link-btn" (click)="setMode('login')">
+                Voltar ao login
+              </button>
+            </div>
+          </form>
+        }
+
+        <!-- Demo notice -->
+        <div class="demo-notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zm-9-3.75h.008v.008H12V8.25z"/>
+          </svg>
+          <span>Modo demonstração ativo — qualquer credencial é aceita</span>
+        </div>
+      </div>
+    </main>
+  </div><!-- /login-shell -->
+
+</div><!-- /login-root -->

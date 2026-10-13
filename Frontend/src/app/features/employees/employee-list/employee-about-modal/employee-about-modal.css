@@ -1,0 +1,510 @@
+.modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-container {
+      background-color: #13131a;
+      border: 1px solid rgba(10, 225, 140, 0.2);
+      border-radius: 16px;
+      max-width: 800px;
+      width: 92%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid rgba(10, 225, 140, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      color: #ffffff;
+      font-size: 1.4rem;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: #a0a0a5;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+
+    .close-btn:hover {
+      color: #ffffff;
+    }
+
+    .close-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .modal-body {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .modal-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+      background: #2a2a36;
+      border-radius: 3px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb:hover {
+      background: #3a3a46;
+    }
+
+    .info-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .info-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .info-section h3 {
+      color: #0AE18C;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(10, 225, 140, 0.1);
+      flex: 1;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem 1.5rem;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      position: relative;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .info-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .info-item.editing {
+      background: rgba(10, 225, 140, 0.05);
+      border: 1px solid rgba(10, 225, 140, 0.2);
+      padding: 0.25rem 0.5rem;
+    }
+
+    .info-item.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .label {
+      font-size: 0.7rem;
+      color: #a0a0a5;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .value-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-height: 32px;
+    }
+
+    .value {
+      font-size: 0.95rem;
+      color: #ffffff;
+      word-break: break-word;
+      flex: 1;
+    }
+
+    .edit-btn {
+      background: transparent;
+      border: none;
+      color: #a0a0a5;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: all 0.2s;
+      opacity: 0;
+    }
+
+    .info-item:hover .edit-btn {
+      opacity: 1;
+    }
+
+    .edit-btn:hover {
+      background: rgba(10, 225, 140, 0.1);
+      color: #0AE18C;
+    }
+
+    .edit-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .copy-btn, .section-action {
+      background: transparent;
+      border: 1px solid rgba(10, 225, 140, 0.25);
+      border-radius: 4px;
+      color: #0AE18C;
+      cursor: pointer;
+      font-size: 0.72rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .copy-btn:hover, .section-action:hover {
+      background: rgba(10, 225, 140, 0.1);
+    }
+
+    .edit-input {
+      flex: 1;
+      background: #1a1a24;
+      border: 1px solid rgba(10, 225, 140, 0.3);
+      border-radius: 4px;
+      color: #ffffff;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.95rem;
+      outline: none;
+      min-width: 0;
+    }
+
+    .edit-input:focus {
+      border-color: #0AE18C;
+      box-shadow: 0 0 0 2px rgba(10, 225, 140, 0.1);
+    }
+
+    .edit-select {
+      flex: 1;
+      background: #1a1a24;
+      border: 1px solid rgba(10, 225, 140, 0.3);
+      border-radius: 4px;
+      color: #ffffff;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.95rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .edit-select:focus {
+      border-color: #0AE18C;
+      box-shadow: 0 0 0 2px rgba(10, 225, 140, 0.1);
+    }
+
+    .edit-textarea {
+      flex: 1;
+      background: #1a1a24;
+      border: 1px solid rgba(10, 225, 140, 0.3);
+      border-radius: 4px;
+      color: #ffffff;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.95rem;
+      outline: none;
+      resize: vertical;
+      font-family: inherit;
+      min-height: 60px;
+    }
+
+    .edit-textarea:focus {
+      border-color: #0AE18C;
+      box-shadow: 0 0 0 2px rgba(10, 225, 140, 0.1);
+    }
+
+    .edit-actions {
+      display: flex;
+      gap: 0.25rem;
+      flex-shrink: 0;
+    }
+
+    .save-btn, .cancel-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .save-btn {
+      color: #0AE18C;
+    }
+
+    .save-btn:hover {
+      background: rgba(10, 225, 140, 0.15);
+    }
+
+    .cancel-btn {
+      color: #ef4444;
+    }
+
+    .cancel-btn:hover {
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.2rem 0.7rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-badge.active {
+      background-color: rgba(10, 225, 140, 0.15);
+      color: #0AE18C;
+    }
+
+    .status-badge.inactive {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    .status-badge.backup {
+      background-color: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+    }
+
+    .status-badge.reverse {
+      background-color: rgba(236, 72, 153, 0.15);
+      color: #f472b6;
+    }
+
+    .licenses-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .license-badge {
+      background-color: rgba(10, 225, 140, 0.1);
+      color: #0AE18C;
+      padding: 0.3rem 0.8rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(10, 225, 140, 0.2);
+    }
+
+    .licenses-edit-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+    }
+
+    .license-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border: 1px solid #2a2a36;
+      border-radius: 5px;
+      color: #fff;
+      font-size: 0.8rem;
+    }
+
+    .license-edit-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .btn-primary {
+      background: #0AE18C;
+      border: 0;
+      border-radius: 6px;
+      color: #0d0d11;
+      cursor: pointer;
+      font-weight: 600;
+      padding: 0.6rem 1rem;
+    }
+
+    .btn-primary:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .license-history {
+      margin-top: 1rem;
+      border-top: 1px solid rgba(10, 225, 140, 0.1);
+      padding-top: 0.75rem;
+    }
+
+    .license-history h4 {
+      color: #a0a0a5;
+      font-size: 0.75rem;
+      margin: 0 0 0.5rem;
+      text-transform: uppercase;
+    }
+
+    .history-entry {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      padding: 0.45rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #fff;
+      font-size: 0.78rem;
+    }
+
+    .history-entry time, .history-empty {
+      color: #a0a0a5;
+      font-size: 0.72rem;
+    }
+
+    .modal-footer {
+      padding: 1rem 2rem;
+      border-top: 1px solid rgba(10, 225, 140, 0.1);
+      display: flex;
+      justify-content: flex-end;
+      flex-shrink: 0;
+    }
+
+    .btn-secondary {
+      background-color: #1a1a24;
+      color: #ffffff;
+      border: 1px solid #2a2a36;
+      padding: 0.6rem 1.5rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: #0AE18C;
+      color: #0AE18C;
+    }
+
+    .message-saving, .message-success, .message-error {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    .message-saving {
+      background: rgba(10, 225, 140, 0.05);
+      color: #a0a0a5;
+      border: 1px solid rgba(10, 225, 140, 0.1);
+    }
+
+    .message-success {
+      background: rgba(10, 225, 140, 0.1);
+      color: #0AE18C;
+      border: 1px solid rgba(10, 225, 140, 0.2);
+    }
+
+    .message-error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .confirmation-overlay { position: fixed; inset: 0; z-index: 1100; display: flex; align-items: center; justify-content: center; padding: 1rem; background: rgba(0, 0, 0, 0.72); }
+    .confirmation-modal { width: min(440px, 100%); padding: 1.5rem; border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 12px; background: #13131a; color: #fff; }
+    .confirmation-modal h2 { margin: 0 0 0.75rem; }.confirmation-modal p { color: #c5c5ca; }.confirmation-modal li { margin: 0.5rem 0; }.confirmation-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1.25rem; }.btn-danger { border: 0; border-radius: 6px; padding: 0.65rem 1rem; background: #ef4444; color: #fff; font-weight: 600; cursor: pointer; }
+
+    @media (max-width: 600px) {
+      .modal-container {
+        width: 95%;
+        max-height: 90vh;
+      }
+
+      .modal-header {
+        padding: 1rem 1.25rem;
+      }
+
+      .modal-body {
+        padding: 1rem 1.25rem;
+      }
+
+      .modal-footer {
+        padding: 0.75rem 1.25rem;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+
+      .info-item.full-width {
+        grid-column: 1;
+      }
+
+      .value-wrapper {
+        flex-wrap: wrap;
+      }
+
+      .edit-input, .edit-select, .edit-textarea {
+        width: 100%;
+        flex: none;
+      }
+
+      .edit-actions {
+        margin-top: 0.25rem;
+      }
+    }

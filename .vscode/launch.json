@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-NexoraApplication<nexora>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "nexora.planning.nexora.NexoraApplication",
+            "projectName": "nexora",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

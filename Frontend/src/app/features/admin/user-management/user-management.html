@@ -1,0 +1,212 @@
+<div class="um-page page-container">
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <div class="um-header">
+    <div>
+      <p class="um-label">Administração</p>
+      <h1 class="um-title">Gestão de Usuários</h1>
+    </div>
+    <button class="um-btn-primary" (click)="openCreate()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Novo usuário
+    </button>
+  </div>
+
+  <!-- ── Search ─────────────────────────────────────────────────────────── -->
+  <div class="um-search-wrap">
+    <svg class="um-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input type="search" class="um-search" placeholder="Filtrar por nome, e-mail ou usuário..."
+           [(ngModel)]="search" aria-label="Filtrar usuários"/>
+  </div>
+
+  <!-- ── Tabela ─────────────────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="um-loading">
+      <span class="um-spinner" aria-hidden="true"></span>
+      <span>Carregando usuários…</span>
+    </div>
+  } @else if (error()) {
+    <div class="um-error" role="alert">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ error() }}
+      <button class="um-btn-retry" (click)="load()">Tentar novamente</button>
+    </div>
+  } @else {
+    <div class="um-table-wrap">
+      <table class="um-table" aria-label="Usuários do sistema">
+        <thead>
+          <tr>
+            <th scope="col">Nome</th>
+            <th scope="col">Usuário</th>
+            <th scope="col">E-mail</th>
+            <th scope="col">Perfil / Equipe</th>
+            <th scope="col">Status</th>
+            <th scope="col">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of filteredUsers; track u.id) {
+            <tr class="um-row">
+              <td class="um-td-name">
+                <div class="um-avatar">{{ u.fullName.slice(0,2).toUpperCase() }}</div>
+                <div class="um-user-info">
+                  <span class="um-fullname">{{ u.fullName }}</span>
+                  @if (u.department) {
+                    <span class="um-dept">{{ u.department }}</span>
+                  }
+                </div>
+              </td>
+              <td class="um-td-mono">{{ u.username }}</td>
+              <td class="um-td-mono">{{ u.email }}</td>
+              <td>
+                <span class="um-role-badge" [class]="'um-role-' + u.teamRole.replace('ROLE_','').toLowerCase()">
+                  {{ u.teamRoleDisplay || roleLabel(u.teamRole) }}
+                </span>
+              </td>
+              <td>
+                <span class="um-status-badge" [class.um-status--active]="u.active"
+                      [class.um-status--inactive]="!u.active">
+                  {{ u.active ? 'Ativo' : 'Inativo' }}
+                </span>
+              </td>
+              <td class="um-actions">
+                <button class="um-action-btn" (click)="openEdit(u)" title="Editar" aria-label="Editar {{ u.fullName }}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+                <button class="um-action-btn"
+                        [class.um-action-btn--danger]="u.active"
+                        (click)="toggleActive(u)"
+                        [title]="u.active ? 'Desativar' : 'Ativar'"
+                        [attr.aria-label]="(u.active ? 'Desativar' : 'Ativar') + ' ' + u.fullName">
+                  @if (u.active) {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                    </svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+                    </svg>
+                  }
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="um-empty-cell">Nenhum usuário encontrado.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginação -->
+    <div class="um-pagination">
+      <span class="um-page-info">{{ total() }} usuário{{ total() !== 1 ? 's' : '' }}</span>
+      <button class="um-page-btn" (click)="prevPage()" [disabled]="page() === 0" aria-label="Página anterior">←</button>
+      <span class="um-page-num">{{ page() + 1 }}</span>
+      <button class="um-page-btn" (click)="nextPage()"
+              [disabled]="(page() + 1) * pageSize >= total()" aria-label="Próxima página">→</button>
+    </div>
+  }
+</div>
+
+<!-- ── MODAL ──────────────────────────────────────────────────────────────── -->
+@if (showModal()) {
+  <div class="um-backdrop" (click)="closeModal()" aria-hidden="true"></div>
+  <div class="um-modal" role="dialog" aria-modal="true"
+       [attr.aria-label]="modalMode() === 'create' ? 'Criar usuário' : 'Editar usuário'">
+
+    <div class="um-modal-header">
+      <h2 class="um-modal-title">{{ modalMode() === 'create' ? 'Novo Usuário' : 'Editar Usuário' }}</h2>
+      <button class="um-modal-close" (click)="closeModal()" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="um-modal-body">
+      <div class="um-form-grid">
+
+        <div class="um-form-field">
+          <label class="um-form-label" for="um-fullname">Nome completo <span class="um-req">*</span></label>
+          <input id="um-fullname" type="text" class="um-form-input" [(ngModel)]="form.fullName" placeholder="Ex: Arthur Alves"/>
+        </div>
+
+        <div class="um-form-field">
+          <label class="um-form-label" for="um-username">Usuário <span class="um-req">*</span></label>
+          <input id="um-username" type="text" class="um-form-input" [(ngModel)]="form.username" placeholder="Ex: arthur.alves"/>
+        </div>
+
+        <div class="um-form-field um-form-field--full">
+          <label class="um-form-label" for="um-email">E-mail <span class="um-req">*</span></label>
+          <input id="um-email" type="email" class="um-form-input" [(ngModel)]="form.email" placeholder="email@empresa.com"/>
+        </div>
+
+        <div class="um-form-field um-form-field--full">
+          <label class="um-form-label" for="um-password">
+            Senha {{ modalMode() === 'edit' ? '(deixe em branco para não alterar)' : '' }}
+            @if (modalMode() === 'create') { <span class="um-req">*</span> }
+          </label>
+          <input id="um-password" type="password" class="um-form-input" [(ngModel)]="form.password" placeholder="Mínimo 6 caracteres"/>
+        </div>
+
+        <div class="um-form-field">
+          <label class="um-form-label" for="um-role">Perfil / Equipe <span class="um-req">*</span></label>
+          <select id="um-role" class="um-form-input" [(ngModel)]="form.teamRole">
+            @for (r of roles; track r.value) {
+              <option [value]="r.value">{{ r.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="um-form-field">
+          <label class="um-form-label" for="um-dept">Departamento</label>
+          <input id="um-dept" type="text" class="um-form-input" [(ngModel)]="form.department" placeholder="Ex: TI, DOC, RH"/>
+        </div>
+
+        <div class="um-form-field um-form-field--checkbox">
+          <label class="um-checkbox-label">
+            <input type="checkbox" [(ngModel)]="form.isTeamMember"/>
+            <span>Membro de equipe interna</span>
+          </label>
+        </div>
+
+        @if (modalMode() === 'edit') {
+          <div class="um-form-field um-form-field--checkbox">
+            <label class="um-checkbox-label">
+              <input type="checkbox" [(ngModel)]="form.active"/>
+              <span>Conta ativa</span>
+            </label>
+          </div>
+        }
+      </div>
+
+      @if (modalError()) {
+        <div class="um-modal-error" role="alert">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {{ modalError() }}
+        </div>
+      }
+    </div>
+
+    <div class="um-modal-footer">
+      <button class="um-btn-ghost" (click)="closeModal()">Cancelar</button>
+      <button class="um-btn-primary" (click)="saveModal()" [disabled]="modalLoading()">
+        @if (modalLoading()) { <span class="um-spinner" aria-hidden="true"></span> Salvando… }
+        @else { {{ modalMode() === 'create' ? 'Criar usuário' : 'Salvar alterações' }} }
+      </button>
+    </div>
+  </div>
+}
