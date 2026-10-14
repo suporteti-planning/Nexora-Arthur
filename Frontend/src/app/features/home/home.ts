@@ -116,8 +116,8 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   // ── Canvas internals ──────────────────────────────────────────────────────
   private animFrameId = 0;
-  private mouseX = window.innerWidth  / 2;
-  private mouseY = window.innerHeight / 2;
+  private mouseX = 0;   // inicializado em ngAfterViewInit — não usar window no construtor
+  private mouseY = 0;
   private nodes: { x:number; y:number; vx:number; vy:number; r:number; pulse:number; pspd:number; br:number }[] = [];
   private onResizeFn!: () => void;
   private onMouseFn!:  (e: MouseEvent) => void;
@@ -139,7 +139,23 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.zone.runOutsideAngular(() => this.initCanvas(reduced));
+
+    // Inicializa coordenadas do mouse no centro da tela (seguro no browser)
+    this.mouseX = window.innerWidth  / 2;
+    this.mouseY = window.innerHeight / 2;
+
+    // Cancela qualquer loop anterior antes de iniciar novo (navegação SPA)
+    if (this.animFrameId) {
+      cancelAnimationFrame(this.animFrameId);
+      this.animFrameId = 0;
+    }
+
+    this.zone.runOutsideAngular(() => {
+      // setTimeout(0) garante que o canvas está completamente renderizado no DOM
+      // antes de chamar initCanvas — crítico após navegação de /intro → /home
+      setTimeout(() => this.initCanvas(reduced), 0);
+    });
+
     if (!reduced) {
       this.gsapCtx = gsap.context(() => {
         gsap.timeline({ defaults: { ease: 'power3.out' } })
@@ -203,7 +219,13 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   // ── Canvas background ─────────────────────────────────────────────────────
   private initCanvas(reduced: boolean): void {
     const cv  = this.canvasRef?.nativeElement;
-    if (!cv) return;
+    // Guarda diagnóstico: se o canvas não estiver disponível, tenta novamente
+    if (!cv) {
+      setTimeout(() => {
+        this.zone.runOutsideAngular(() => this.initCanvas(reduced));
+      }, 50);
+      return;
+    }
     const ctx = cv.getContext('2d');
     if (!ctx) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -234,6 +256,9 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (reduced) { this.drawFrame(ctx, cv); return; }
+
+    // Garante que não há loop duplo rodando
+    if (this.animFrameId) cancelAnimationFrame(this.animFrameId);
 
     const loop = () => {
       this.animFrameId = requestAnimationFrame(loop);
