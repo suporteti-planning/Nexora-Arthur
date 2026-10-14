@@ -138,25 +138,26 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Inicializa coordenadas do mouse no centro da tela (seguro no browser)
+    // Inicializa coordenadas do mouse no centro da tela
     this.mouseX = window.innerWidth  / 2;
     this.mouseY = window.innerHeight / 2;
 
-    // Cancela qualquer loop anterior antes de iniciar novo (navegação SPA)
-    if (this.animFrameId) {
-      cancelAnimationFrame(this.animFrameId);
-      this.animFrameId = 0;
-    }
+    // Cancela qualquer loop anterior (SPA re-mount)
+    cancelAnimationFrame(this.animFrameId);
+    this.animFrameId = 0;
 
+    // Canvas roda SEMPRE — prefers-reduced-motion afeta só as animações GSAP
+    // Delay duplo garante que o canvas está no DOM após lazy routing
     this.zone.runOutsideAngular(() => {
-      // setTimeout(0) garante que o canvas está completamente renderizado no DOM
-      // antes de chamar initCanvas — crítico após navegação de /intro → /home
-      setTimeout(() => this.initCanvas(reduced), 0);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => this.initCanvas());
+      });
     });
 
-    if (!reduced) {
+    // GSAP — só se o usuário não preferir movimento reduzido
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reducedMotion) {
       this.gsapCtx = gsap.context(() => {
         gsap.timeline({ defaults: { ease: 'power3.out' } })
           .fromTo('.hm-topbar',  { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: 0.5 })
@@ -216,55 +217,66 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     if (!(e.target as HTMLElement).closest('.acct-anchor')) this.accountMenuOpen.set(false);
   }
 
-  // ── Canvas background ─────────────────────────────────────────────────────
-  private initCanvas(reduced: boolean): void {
-    const cv  = this.canvasRef?.nativeElement;
-    // Guarda diagnóstico: se o canvas não estiver disponível, tenta novamente
+  // ── Canvas background — network graph animado ────────────────────────────
+  private initCanvas(): void {
+    const cv = this.canvasRef?.nativeElement;
     if (!cv) {
-      setTimeout(() => {
-        this.zone.runOutsideAngular(() => this.initCanvas(reduced));
-      }, 50);
+      // Canvas ainda não disponível — reagenda no próximo frame
+      this.zone.runOutsideAngular(() =>
+        requestAnimationFrame(() => this.initCanvas())
+      );
       return;
     }
+
     const ctx = cv.getContext('2d');
     if (!ctx) return;
+
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
     const resize = () => {
       const w = window.innerWidth, h = window.innerHeight;
       cv.width  = w * dpr; cv.height = h * dpr;
-      cv.style.width = `${w}px`; cv.style.height = `${h}px`;
+      cv.style.width  = `${w}px`;
+      cv.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const area = w * h;
-      const n = Math.max(40, Math.min(110, Math.floor(area / 14000)));
+      const n = Math.max(40, Math.min(110, Math.floor(w * h / 14000)));
       this.nodes = Array.from({ length: n }, () => ({
-        x: Math.random() * w, y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.28, vy: (Math.random() - 0.5) * 0.28,
-        r: 1.2 + Math.random() * 1.8,
+        x:    Math.random() * w,
+        y:    Math.random() * h,
+        vx:   (Math.random() - 0.5) * 0.28,
+        vy:   (Math.random() - 0.5) * 0.28,
+        r:    1.2 + Math.random() * 1.8,
         pulse: Math.random() * Math.PI * 2,
         pspd: 0.012 + Math.random() * 0.018,
-        br: 0.35 + Math.random() * 0.65,
+        br:   0.35 + Math.random() * 0.65,
       }));
     };
+
+    // Remove listener anterior se existir (re-mount SPA)
+    if (this.onResizeFn) window.removeEventListener('resize', this.onResizeFn);
     this.onResizeFn = resize;
     window.addEventListener('resize', resize);
     resize();
 
+    if (this.onMouseFn) window.removeEventListener('mousemove', this.onMouseFn);
     if (!window.matchMedia('(hover: none)').matches) {
-      this.onMouseFn = (e: MouseEvent) => { this.mouseX = e.clientX; this.mouseY = e.clientY; };
+      this.onMouseFn = (e: MouseEvent) => {
+        this.mouseX = e.clientX;
+        this.mouseY = e.clientY;
+      };
       window.addEventListener('mousemove', this.onMouseFn, { passive: true });
     }
 
-    if (reduced) { this.drawFrame(ctx, cv); return; }
-
-    // Garante que não há loop duplo rodando
-    if (this.animFrameId) cancelAnimationFrame(this.animFrameId);
+    // Garante que não há loop duplo
+    cancelAnimationFrame(this.animFrameId);
 
     const loop = () => {
       this.animFrameId = requestAnimationFrame(loop);
       const W = cv.width / dpr, H = cv.height / dpr;
+
       for (const n of this.nodes) {
-        const dx = this.mouseX - n.x, dy = this.mouseY - n.y;
+        const dx = this.mouseX - n.x;
+        const dy = this.mouseY - n.y;
         const d  = Math.sqrt(dx * dx + dy * dy);
         if (d < 200 && d > 1) { n.vx += dx * 0.00018; n.vy += dy * 0.00018; }
         n.vx *= 0.992; n.vy *= 0.992;

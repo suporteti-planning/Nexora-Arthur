@@ -1,7 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, shareReplay } from 'rxjs';
+import { Observable, of, catchError } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AuthService } from './auth.service';
+import { TicketLocalService } from './ticket-local.service';
 
 export type TicketPriority   = 'BAIXA' | 'MEDIA' | 'ALTA' | 'URGENTE';
 export type TicketStatus     = 'NOVO' | 'EM_ANDAMENTO' | 'AGUARDANDO' | 'RESOLVIDO' | 'CANCELADO';
@@ -110,29 +112,47 @@ export interface TicketUpdateRequest {
 
 @Injectable({ providedIn: 'root' })
 export class TicketService {
-  private readonly api = `${environment.apiUrl}/api/tickets`;
+  private readonly api   = `${environment.apiUrl}/api/tickets`;
+  private readonly auth  = inject(AuthService);
+  private readonly local = inject(TicketLocalService);
 
   constructor(private http: HttpClient) {}
 
+  /** Tenta criar no backend; em caso de falha persiste localmente. */
   create(req: TicketRequest): Observable<TicketResponse> {
-    return this.http.post<TicketResponse>(this.api, req);
+    return this.http.post<TicketResponse>(this.api, req).pipe(
+      catchError(() => {
+        const u = this.auth.sessionUser();
+        const t = this.local.create(req, u?.displayName ?? 'Você', u?.email ?? '');
+        return of(t);
+      }),
+    );
   }
 
   getMine(page = 0, size = 20): Observable<Page<TicketResponse>> {
     const params = new HttpParams().set('page', page).set('size', size);
-    return this.http.get<Page<TicketResponse>>(`${this.api}/mine`, { params });
+    return this.http.get<Page<TicketResponse>>(`${this.api}/mine`, { params }).pipe(
+      catchError(() => {
+        const email = this.auth.sessionUser()?.email ?? '';
+        return of(this.local.getMine(email, page, size));
+      }),
+    );
   }
 
   getByDept(dept: DestDepartment, page = 0, size = 20): Observable<Page<TicketResponse>> {
     const params = new HttpParams().set('page', page).set('size', size);
-    return this.http.get<Page<TicketResponse>>(`${this.api}/dept/${dept}`, { params });
+    return this.http.get<Page<TicketResponse>>(`${this.api}/dept/${dept}`, { params }).pipe(
+      catchError(() => of(this.local.getByDept(dept, page, size))),
+    );
   }
 
   getAll(dept?: DestDepartment, status?: TicketStatus, page = 0, size = 30): Observable<Page<TicketResponse>> {
     let params = new HttpParams().set('page', page).set('size', size);
     if (dept)   params = params.set('dept', dept);
     if (status) params = params.set('status', status);
-    return this.http.get<Page<TicketResponse>>(this.api, { params });
+    return this.http.get<Page<TicketResponse>>(this.api, { params }).pipe(
+      catchError(() => of(this.local.getAll(dept, status, page, size))),
+    );
   }
 
   getById(id: number): Observable<TicketResponse> {

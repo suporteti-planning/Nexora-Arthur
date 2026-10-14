@@ -159,7 +159,16 @@ export class OpenTicketModal implements OnInit {
       req.companyName      = this.companyName.trim()      || undefined;
       req.companyCnpj      = this.companyCnpj.trim()      || undefined;
       req.emailDestination = this.emailDestination.trim() || undefined;
-      if (this.extraDesc.trim()) req.extraData = { descricaoAdicional: this.extraDesc.trim() };
+      if (this.extraDesc.trim()) req.extraData = {
+        descricaoAdicional: this.extraDesc.trim(),
+        // nomes para fallback local
+        _processName: this.selectedProcess.name,
+        _stepName:    this.selectedStep.name,
+      };
+      else req.extraData = {
+        _processName: this.selectedProcess.name,
+        _stepName:    this.selectedStep.name,
+      };
     }
 
     this.ticketSvc.create(req).subscribe({
