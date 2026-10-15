@@ -156,10 +156,21 @@ export class TicketService {
   }
 
   getById(id: number): Observable<TicketResponse> {
-    return this.http.get<TicketResponse>(`${this.api}/${id}`);
+    return this.http.get<TicketResponse>(`${this.api}/${id}`).pipe(
+      catchError(() => {
+        const t = this.local.getById(id);
+        return t ? of(t) : of(null as unknown as TicketResponse);
+      }),
+    );
   }
 
   update(id: number, req: TicketUpdateRequest): Observable<TicketResponse> {
-    return this.http.patch<TicketResponse>(`${this.api}/${id}`, req);
+    return this.http.patch<TicketResponse>(`${this.api}/${id}`, req).pipe(
+      catchError(() => {
+        const u = this.auth.sessionUser();
+        const t = this.local.update(id, req, u?.displayName ?? 'Usuário');
+        return t ? of(t) : of(null as unknown as TicketResponse);
+      }),
+    );
   }
 }

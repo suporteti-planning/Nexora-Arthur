@@ -5,8 +5,6 @@
   <!-- ══ TOPBAR ══════════════════════════════════════════════════════════════ -->
   <header class="doc-topbar">
     <div class="doc-topbar-inner">
-
-      <!-- Brand -->
       <div class="doc-brand">
         <div class="doc-brand-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
@@ -19,8 +17,6 @@
           <span class="doc-brand-sub">INTRANET CORPORATIVA</span>
         </div>
       </div>
-
-      <!-- Search -->
       <div class="doc-search-wrap">
         <svg class="doc-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -28,27 +24,21 @@
         <input type="search" class="doc-search-input" placeholder="Buscar no sistema..."
                [(ngModel)]="searchQuery" aria-label="Buscar chamados" />
       </div>
-
-      <!-- Right actions -->
       <div class="doc-topbar-right">
-        <a routerLink="/home" class="doc-icon-btn" title="Início" aria-label="Voltar ao início">
+        <a routerLink="/home" class="doc-icon-btn" title="Início">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
             <polyline points="9 22 9 12 15 12 15 22"/>
           </svg>
         </a>
-
-        <!-- Account -->
         <div class="doc-acct-anchor">
-          <button class="doc-user-btn" (click)="toggleAccountMenu()"
-                  [attr.aria-expanded]="accountMenuOpen()" aria-haspopup="true">
-            <div class="doc-avatar" aria-hidden="true">{{ user()?.initials ?? '?' }}</div>
+          <button class="doc-user-btn" (click)="toggleAccountMenu()" [attr.aria-expanded]="accountMenuOpen()">
+            <div class="doc-avatar">{{ user()?.initials ?? '?' }}</div>
             <div class="doc-user-info">
               <span class="doc-user-name">{{ user()?.displayName ?? 'Usuário' }}</span>
               <span class="doc-user-role">Colaborador</span>
             </div>
           </button>
-
           @if (accountMenuOpen()) {
             <div class="doc-dropdown" role="menu">
               <div class="doc-dropdown-header">
@@ -76,21 +66,17 @@
 
   <!-- ══ BODY ════════════════════════════════════════════════════════════════ -->
   <div class="doc-body">
-
-    <!-- ── SIDEBAR ────────────────────────────────────────────────────────── -->
-    <aside class="doc-sidebar" aria-label="Navegação">
+    <aside class="doc-sidebar">
       <nav class="doc-nav">
-        <p class="doc-nav-label" aria-hidden="true">NAVEGAÇÃO</p>
-        <a routerLink="/home"  class="doc-nav-item" aria-label="Início">
+        <p class="doc-nav-label">NAVEGAÇÃO</p>
+        <a routerLink="/home" class="doc-nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
             <polyline points="9 22 9 12 15 12 15 22"/>
           </svg>
           <span>Início</span>
         </a>
-        <a routerLink="/doc" routerLinkActive="doc-nav-item--active"
-           [routerLinkActiveOptions]="{exact:true}"
-           class="doc-nav-item" aria-label="Painel DOC">
+        <a routerLink="/doc" routerLinkActive="doc-nav-item--active" [routerLinkActiveOptions]="{exact:true}" class="doc-nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
@@ -98,11 +84,9 @@
           <span>Painel DOC</span>
         </a>
       </nav>
-
-      <!-- Footer -->
       <div class="doc-sidebar-footer">
         <div class="doc-sidebar-brand">
-          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none">
             <circle cx="10" cy="10" r="8" stroke="#00FF66" stroke-width="1.5"/>
             <circle cx="10" cy="10" r="3" fill="#00FF66" opacity=".85"/>
           </svg>
@@ -114,10 +98,8 @@
       </div>
     </aside>
 
-    <!-- ── MAIN ───────────────────────────────────────────────────────────── -->
-    <main class="doc-content" aria-label="Painel DOC">
-
-      <!-- Page header -->
+    <!-- ── MAIN ──────────────────────────────────────────────────────────── -->
+    <main class="doc-content">
       <div class="doc-page-header">
         <div>
           <p class="doc-page-label">DOC</p>
@@ -126,7 +108,7 @@
         </div>
         <div class="doc-page-actions">
           <p class="doc-page-date">{{ todayDate }}</p>
-          <button class="doc-btn-new" (click)="openModal()" aria-label="Nova Solicitação">
+          <button class="doc-btn-new" (click)="openNewModal()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
@@ -135,9 +117,8 @@
         </div>
       </div>
 
-      <!-- Success toast -->
       @if (ticketCreated()) {
-        <div class="doc-toast" role="status" aria-live="polite">
+        <div class="doc-toast" role="status">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
           </svg>
@@ -145,27 +126,23 @@
         </div>
       }
 
-      <!-- Filter bar -->
+      <!-- Filtros — reativos via signal -->
       <div class="doc-filter-bar" role="toolbar" aria-label="Filtros de status">
-        @for (f of statusFilters; track f.value) {
-          <button class="doc-filter-chip" [class.doc-filter-chip--active]="f.active"
-                  (click)="toggleFilter(f)" [attr.aria-pressed]="f.active">
+        @for (f of ALL_FILTERS; track f.value) {
+          <button class="doc-filter-chip"
+                  [class.doc-filter-chip--active]="isFilterActive(f.value)"
+                  (click)="toggleFilter(f.value)"
+                  [attr.aria-pressed]="isFilterActive(f.value)">
             {{ f.label }}
-            @if (countByStatus[f.value]) {
-              <span class="doc-filter-count">{{ countByStatus[f.value] }}</span>
+            @if (countByStatus()[f.value]) {
+              <span class="doc-filter-count">{{ countByStatus()[f.value] }}</span>
             }
           </button>
         }
-        <button class="doc-btn-filter" aria-label="Opções de filtro">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-          </svg>
-          Filtrar
-        </button>
       </div>
 
       <!-- Fila operacional -->
-      <section class="doc-queue-section" aria-label="Fila operacional">
+      <section class="doc-queue-section">
         <div class="doc-queue-header">
           <div class="doc-queue-title-row">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -174,62 +151,45 @@
             <h2 class="doc-queue-title">
               FILA OPERACIONAL
               @if (!loading() && !loadError()) {
-                <span class="doc-queue-badge">{{ filteredTickets.length }}</span>
+                <span class="doc-queue-badge">{{ filteredTickets().length }}</span>
               }
             </h2>
           </div>
           <p class="doc-queue-sub">Processos e documentos pendentes</p>
         </div>
 
-        <!-- Loading -->
         @if (loading()) {
-          <div class="doc-state doc-state--loading" aria-live="polite" aria-busy="true">
-            <span class="doc-spinner" aria-hidden="true"></span>
-            <span>Carregando chamados…</span>
+          <div class="doc-state doc-state--loading">
+            <span class="doc-spinner"></span><span>Carregando chamados…</span>
           </div>
-        }
-
-        <!-- Error -->
-        @else if (loadError()) {
+        } @else if (loadError()) {
           <div class="doc-state doc-state--error" role="alert">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
             <p>Não foi possível carregar o resumo operacional.</p>
             <button class="doc-btn-retry" (click)="retryLoad()">Tentar novamente</button>
           </div>
-        }
-
-        <!-- Empty -->
-        @else if (filteredTickets.length === 0) {
-          <div class="doc-state doc-state--empty" role="status">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-              <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
-            </svg>
+        } @else if (filteredTickets().length === 0) {
+          <div class="doc-state doc-state--empty">
             <p>Nenhum chamado encontrado com os filtros selecionados.</p>
-            <button class="doc-btn-new doc-btn-new--sm" (click)="openModal()">+ Nova Solicitação</button>
+            <button class="doc-btn-new doc-btn-new--sm" (click)="openNewModal()">+ Nova Solicitação</button>
           </div>
-        }
-
-        <!-- Table -->
-        @else {
+        } @else {
           <div class="doc-table-wrap">
-            <table class="doc-table" aria-label="Chamados DOC">
+            <table class="doc-table">
               <thead>
                 <tr>
                   <th scope="col">Assunto / ID</th>
-                  <th scope="col">Status · Prioridade · Prazo</th>
-                  <th scope="col">Responsável Interno</th>
+                  <th scope="col">Status · Prioridade</th>
+                  <th scope="col">Responsável</th>
                   <th scope="col">Últ. Atualização</th>
-                  <th scope="col">Departamento</th>
-                  <th scope="col" aria-label="Ações"></th>
+                  <th scope="col">Dept.</th>
+                  <th scope="col"></th>
                 </tr>
               </thead>
               <tbody>
-                @for (ticket of filteredTickets; track trackById($index, ticket)) {
-                  <tr class="doc-row">
-                    <!-- Assunto / ID -->
+                @for (ticket of filteredTickets(); track trackById($index, ticket)) {
+                  <tr class="doc-row doc-row--clickable" (click)="openDetail(ticket)"
+                      [attr.aria-label]="'Abrir detalhes de ' + ticket.title" tabindex="0"
+                      (keydown.enter)="openDetail(ticket)" (keydown.space)="openDetail(ticket)">
                     <td class="doc-td-subject">
                       <div class="doc-subject-title">{{ ticket.title }}</div>
                       <div class="doc-subject-meta">
@@ -245,8 +205,6 @@
                         </div>
                       }
                     </td>
-
-                    <!-- Status + Prioridade -->
                     <td class="doc-td-status">
                       <div class="doc-badges-row">
                         <span class="doc-status-badge" [class]="getStatusClass(ticket.status)">
@@ -258,37 +216,23 @@
                       </div>
                       <div class="doc-td-date">{{ formatDate(ticket.createdAt) }}</div>
                     </td>
-
-                    <!-- Responsável -->
                     <td class="doc-td-assignee">
                       @if (ticket.assignee) {
                         <div class="doc-assignee">
-                          <div class="doc-assignee-avatar" aria-hidden="true">
-                            {{ ticket.assignee.fullName.slice(0,1) }}
-                          </div>
+                          <div class="doc-assignee-avatar">{{ ticket.assignee.fullName.slice(0,1) }}</div>
                           <span>{{ ticket.assignee.fullName }}</span>
                         </div>
                       } @else {
                         <span class="doc-td-none">Não atribuído</span>
                       }
                     </td>
-
-                    <!-- Última atualização -->
                     <td class="doc-td-date">{{ formatDate(ticket.updatedAt) }}</td>
-
-                    <!-- Departamento -->
-                    <td class="doc-td-dept">
-                      <span class="doc-dept-badge">DOC</span>
-                    </td>
-
-                    <!-- Ações -->
+                    <td><span class="doc-dept-badge">DOC</span></td>
                     <td class="doc-td-actions">
-                      <button class="doc-action-lock" aria-label="Ver detalhes de {{ ticket.title }}" title="Ver detalhes">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                          <rect x="4" y="10" width="16" height="11" rx="2"/>
-                          <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
-                        </svg>
-                      </button>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                           class="doc-row-arrow" aria-hidden="true">
+                        <path d="M9 18l6-6-6-6"/>
+                      </svg>
                     </td>
                   </tr>
                 }
@@ -299,13 +243,172 @@
       </section>
     </main>
   </div>
-
 </div>
 
-<!-- Modal de abertura de chamado -->
-@if (showTicketModal()) {
+<!-- ══ MODAL NOVO CHAMADO ═══════════════════════════════════════════════════ -->
+@if (showNewModal()) {
   <app-open-ticket-modal
-    (closed)="closeModal()"
+    (closed)="closeNewModal()"
     (created)="onCreated($event)"
   ></app-open-ticket-modal>
+}
+
+<!-- ══ MODAL DETALHES DO CHAMADO ═══════════════════════════════════════════ -->
+@if (detailTicket()) {
+  <div class="dtl-backdrop" (click)="closeDetail()" aria-hidden="true"></div>
+  <div class="dtl-modal" role="dialog" aria-modal="true" aria-label="Detalhes do chamado">
+
+    <!-- Header -->
+    <div class="dtl-header">
+      <div class="dtl-header-left">
+        <span class="dtl-number">{{ detailTicket()!.number }}</span>
+        <span class="doc-status-badge" [class]="getStatusClass(detailTicket()!.status)">
+          {{ statusLabels[detailTicket()!.status] }}
+        </span>
+        <span class="doc-priority-badge" [class]="getPriorityClass(detailTicket()!.priority)">
+          {{ priorityLabels[detailTicket()!.priority] }}
+        </span>
+      </div>
+      <button class="dtl-close" (click)="closeDetail()" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="dtl-body">
+
+      <!-- Título e descrição -->
+      <h2 class="dtl-title">{{ detailTicket()!.title }}</h2>
+      @if (detailTicket()!.description) {
+        <p class="dtl-desc">{{ detailTicket()!.description }}</p>
+      }
+
+      <!-- Metadados -->
+      <div class="dtl-meta-grid">
+        <div class="dtl-meta-item">
+          <span class="dtl-meta-key">Solicitante</span>
+          <span class="dtl-meta-val">{{ detailTicket()!.requester?.fullName ?? '—' }}</span>
+        </div>
+        <div class="dtl-meta-item">
+          <span class="dtl-meta-key">Aberto em</span>
+          <span class="dtl-meta-val">{{ formatDate(detailTicket()!.createdAt) }}</span>
+        </div>
+        <div class="dtl-meta-item">
+          <span class="dtl-meta-key">Última atualização</span>
+          <span class="dtl-meta-val">{{ formatDate(detailTicket()!.updatedAt) }}</span>
+        </div>
+        <div class="dtl-meta-item">
+          <span class="dtl-meta-key">Responsável</span>
+          <span class="dtl-meta-val">{{ detailTicket()!.assignee?.fullName ?? 'Não atribuído' }}</span>
+        </div>
+      </div>
+
+      <!-- Detalhes DOC -->
+      @if (detailTicket()!.docDetail) {
+        <div class="dtl-section">
+          <h3 class="dtl-section-title">Requisição de Processo</h3>
+          <div class="dtl-doc-info">
+            <div class="dtl-meta-item">
+              <span class="dtl-meta-key">Processo</span>
+              <span class="dtl-meta-val">{{ detailTicket()!.docDetail!.processName }}</span>
+            </div>
+            @if (detailTicket()!.docDetail!.companyName) {
+              <div class="dtl-meta-item">
+                <span class="dtl-meta-key">Empresa</span>
+                <span class="dtl-meta-val">
+                  {{ detailTicket()!.docDetail!.companyName }}
+                  @if (detailTicket()!.docDetail!.companyCnpj) {
+                    — {{ detailTicket()!.docDetail!.companyCnpj }}
+                  }
+                </span>
+              </div>
+            }
+          </div>
+
+          <!-- Etapas -->
+          @let steps = getStepsDetail(detailTicket()!);
+          @if (steps.length > 0) {
+            <div class="dtl-steps">
+              <p class="dtl-steps-label">Etapas ({{ steps.length }})</p>
+              @for (s of steps; track $index) {
+                <div class="dtl-step-item">
+                  <span class="dtl-step-num">{{ $index + 1 }}</span>
+                  <div class="dtl-step-body">
+                    <strong>{{ s.stepName }}</strong>
+                    @if (s.description) { <p class="dtl-step-desc">{{ s.description }}</p> }
+                    @if (s.emailDestination) { <p class="dtl-step-email">📧 {{ s.emailDestination }}</p> }
+                    @if (s.informText) { <p class="dtl-step-inform">ℹ {{ s.informText }}</p> }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else if (detailTicket()!.docDetail!.stepName) {
+            <div class="dtl-meta-item" style="margin-top:.5rem">
+              <span class="dtl-meta-key">Etapa</span>
+              <span class="dtl-meta-val">{{ detailTicket()!.docDetail!.stepName }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Histórico -->
+      @if (detailTicket()!.history && detailTicket()!.history!.length > 0) {
+        <div class="dtl-section">
+          <h3 class="dtl-section-title">Histórico</h3>
+          <div class="dtl-history">
+            @for (h of detailTicket()!.history!; track h.id) {
+              <div class="dtl-history-item">
+                <div class="dtl-history-dot" aria-hidden="true"></div>
+                <div class="dtl-history-content">
+                  <div class="dtl-history-meta">
+                    <span class="dtl-history-author">{{ h.changedByName }}</span>
+                    <span class="dtl-history-date">{{ formatDate(h.changedAt) }}</span>
+                  </div>
+                  @if (h.fieldName === 'status') {
+                    <p class="dtl-history-change">
+                      Status alterado de <strong>{{ getStatusLabel(h.oldValue) }}</strong>
+                      para <strong>{{ getStatusLabel(h.newValue) }}</strong>
+                    </p>
+                  }
+                  @if (h.note) { <p class="dtl-history-note">{{ h.note }}</p> }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Atualizar chamado -->
+      <div class="dtl-section">
+        <h3 class="dtl-section-title">Registrar atualização</h3>
+
+        <div class="dtl-update-form">
+          <div class="dtl-field">
+            <label class="dtl-label" for="dtl-status">Alterar status</label>
+            <select id="dtl-status" class="dtl-input" [(ngModel)]="newStatus">
+              @for (s of allStatuses; track s) {
+                <option [value]="s">{{ statusLabels[s] }}</option>
+              }
+            </select>
+          </div>
+          <div class="dtl-field">
+            <label class="dtl-label" for="dtl-comment">Comentário / anotação</label>
+            <textarea id="dtl-comment" class="dtl-input dtl-textarea" rows="3"
+                      [(ngModel)]="newComment"
+                      placeholder="Registre uma atualização, observação ou informação adicional…"></textarea>
+          </div>
+
+          @if (updateError) {
+            <p class="dtl-error" role="alert">{{ updateError }}</p>
+          }
+
+          <button class="dtl-btn-save" (click)="saveUpdate()" [disabled]="savingUpdate">
+            @if (savingUpdate) { <span class="doc-spinner doc-spinner--sm"></span> Salvando… }
+            @else { Salvar atualização }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 }
