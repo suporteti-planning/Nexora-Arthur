@@ -78,6 +78,7 @@ export interface TicketResponse {
   closedAt?:          string;
   sourceRoute?:       string;
   docDetail?:         DocDetailResponse;
+  meta?:              TicketMeta;
   history?:           HistoryEntry[];
 }
 
@@ -95,13 +96,29 @@ export interface TicketRequest {
   priority:        TicketPriority;
   destDepartment:  DestDepartment;
   sourceRoute?:    string;
-  // DOC only
+  /** DOC */
   processId?:      number;
   stepId?:         number;
   companyName?:    string;
   companyCnpj?:    string;
   emailDestination?: string;
+  /** RH / DP — prazo legal SLA em dias */
+  slaDays?:        number;
+  /** Financeiro */
+  valorEstimado?:  number;
+  nfPedido?:       string;
   extraData?:      Record<string, unknown>;
+}
+
+export interface TicketMeta {
+  /** SLA em dias (RH/DP) */
+  slaDays?:       number;
+  /** Data limite calculada */
+  slaDeadline?:   string;
+  /** Valor estimado (Financeiro) */
+  valorEstimado?: number;
+  /** NF ou número do pedido (Financeiro) */
+  nfPedido?:      string;
 }
 
 export interface TicketUpdateRequest {

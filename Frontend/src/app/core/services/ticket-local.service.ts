@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { TicketRequest, TicketResponse, TicketUpdateRequest,
-         TicketStatus, DestDepartment, Page, HistoryEntry } from './ticket.service';
+         TicketStatus, DestDepartment, Page, HistoryEntry, TicketMeta } from './ticket.service';
 
 const STORAGE_KEY = 'nexora.local-tickets';
 let _seqId = Date.now();
@@ -29,6 +29,14 @@ export class TicketLocalService {
       ? Object.fromEntries(Object.entries(req.extraData).filter(([k]) => !k.startsWith('_')))
       : undefined;
 
+    // SLA deadline
+    let slaDeadline: string | undefined;
+    if (req.slaDays) {
+      const d = new Date();
+      d.setDate(d.getDate() + req.slaDays);
+      slaDeadline = d.toISOString();
+    }
+
     const ticket: TicketResponse = {
       id:                  seq,
       number:              `LOCAL-${new Date().getFullYear()}-${String(seq).slice(-5)}`,
@@ -41,6 +49,12 @@ export class TicketLocalService {
       requester: { id: 0, username: userEmail, fullName: userName, email: userEmail },
       createdAt:  now,
       updatedAt:  now,
+      meta: (req.slaDays || req.valorEstimado || req.nfPedido) ? {
+        slaDays:       req.slaDays,
+        slaDeadline,
+        valorEstimado: req.valorEstimado,
+        nfPedido:      req.nfPedido,
+      } : undefined,
       history: [{
         id: 1,
         changedByName: userName,

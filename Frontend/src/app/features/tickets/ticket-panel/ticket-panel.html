@@ -1,0 +1,317 @@
+<div class="tp-panel">
+
+  <!-- ── KPIs ────────────────────────────────────────────────────────────── -->
+  <div class="tp-kpis" [style.--tp-accent]="accentColor">
+    <div class="tp-kpi">
+      <span class="tp-kpi-val">{{ kpis().open }}</span>
+      <span class="tp-kpi-label">Em aberto</span>
+    </div>
+    <div class="tp-kpi">
+      <span class="tp-kpi-val">{{ kpis().done }}</span>
+      <span class="tp-kpi-label">Resolvidos</span>
+    </div>
+    <div class="tp-kpi">
+      <span class="tp-kpi-val">{{ kpis().wait }}</span>
+      <span class="tp-kpi-label">Aguardando</span>
+    </div>
+    @if (variant === 'sla') {
+      <div class="tp-kpi tp-kpi--warn" [class.tp-kpi--alert]="kpis().overdue > 0">
+        <span class="tp-kpi-val">{{ kpis().overdue }}</span>
+        <span class="tp-kpi-label">SLA vencido</span>
+      </div>
+    }
+    <div class="tp-kpi tp-kpi--urgent" [class.tp-kpi--alert]="kpis().urgent > 0">
+      <span class="tp-kpi-val">{{ kpis().urgent }}</span>
+      <span class="tp-kpi-label">Urgentes</span>
+    </div>
+  </div>
+
+  <!-- ── Toolbar ─────────────────────────────────────────────────────────── -->
+  <div class="tp-toolbar">
+    <div class="tp-search-wrap">
+      <svg class="tp-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="search" class="tp-search" placeholder="Filtrar chamados…"
+             [(ngModel)]="searchQuery" aria-label="Filtrar chamados" />
+    </div>
+
+    <div class="tp-filters">
+      @for (f of ALL_FILTERS; track f.value) {
+        <button class="tp-filter-chip"
+                [class.tp-filter-chip--active]="isFilterActive(f.value)"
+                [style.--tp-accent]="accentColor"
+                (click)="toggleFilter(f.value)"
+                [attr.aria-pressed]="isFilterActive(f.value)">
+          {{ f.label }}
+          @if (countByStatus()[f.value]) {
+            <span class="tp-filter-count">{{ countByStatus()[f.value] }}</span>
+          }
+        </button>
+      }
+    </div>
+
+    <button class="tp-btn-new" (click)="openNew()" [style.background]="accentColor">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Nova Solicitação
+    </button>
+  </div>
+
+  <!-- Toast -->
+  @if (createdNumber()) {
+    <div class="tp-toast" role="status" aria-live="polite">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+      </svg>
+      Chamado <strong>{{ createdNumber() }}</strong> criado com sucesso!
+    </div>
+  }
+
+  <!-- ── Tabela ───────────────────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="tp-state">
+      <span class="tp-spinner"></span><span>Carregando…</span>
+    </div>
+  } @else if (loadError()) {
+    <div class="tp-state tp-state--error" role="alert">
+      <p>Não foi possível carregar os chamados.</p>
+      <button class="tp-btn-retry" (click)="loadData()">Tentar novamente</button>
+    </div>
+  } @else if (filteredTickets().length === 0) {
+    <div class="tp-state tp-state--empty" role="status">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+      </svg>
+      <p>Nenhum chamado encontrado.</p>
+    </div>
+  } @else {
+    <div class="tp-table-wrap">
+      <table class="tp-table">
+        <thead>
+          <tr>
+            <th scope="col">ID / Assunto</th>
+            <th scope="col">Status</th>
+            <th scope="col">Prioridade</th>
+            @if (variant === 'sla') {
+              <th scope="col">Prazo SLA</th>
+            }
+            @if (variant === 'financeiro') {
+              <th scope="col">Valor / NF</th>
+            }
+            @if (mode === 'mine') {
+              <th scope="col">Departamento</th>
+            }
+            <th scope="col">Atualização</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of filteredTickets(); track trackById($index, t)) {
+            <tr class="tp-row" (click)="openDetail(t)" tabindex="0"
+                (keydown.enter)="openDetail(t)" (keydown.space)="openDetail(t)"
+                [attr.aria-label]="'Ver detalhes de ' + t.title">
+              <!-- ID / Assunto -->
+              <td class="tp-td-subject">
+                <div class="tp-subject-title">{{ t.title }}</div>
+                <div class="tp-subject-meta">
+                  <span class="tp-id">{{ t.number }}</span>
+                  @if (t.requester) {
+                    <span>{{ t.requester.fullName }}</span>
+                  }
+                </div>
+              </td>
+
+              <!-- Status -->
+              <td>
+                <span class="tp-badge" [class]="getStatusClass(t.status)">
+                  {{ statusLabels[t.status] }}
+                </span>
+              </td>
+
+              <!-- Prioridade -->
+              <td>
+                <span class="tp-badge" [class]="getPriorClass(t.priority)">
+                  {{ priorityLabels[t.priority] }}
+                </span>
+              </td>
+
+              <!-- SLA (variant) -->
+              @if (variant === 'sla') {
+                <td>
+                  @if (t.meta?.slaDeadline) {
+                    <span class="tp-sla" [class]="slaStatusClass(t)">
+                      {{ slaLabel(t) }}
+                    </span>
+                  } @else {
+                    <span class="tp-none">—</span>
+                  }
+                </td>
+              }
+
+              <!-- Financeiro (variant) -->
+              @if (variant === 'financeiro') {
+                <td class="tp-td-fin">
+                  @if (t.meta?.valorEstimado != null) {
+                    <div class="tp-fin-val">{{ formatCurrency(t.meta!.valorEstimado) }}</div>
+                  }
+                  @if (t.meta?.nfPedido) {
+                    <div class="tp-fin-nf">NF {{ t.meta!.nfPedido }}</div>
+                  }
+                  @if (!t.meta?.valorEstimado && !t.meta?.nfPedido) {
+                    <span class="tp-none">—</span>
+                  }
+                </td>
+              }
+
+              <!-- Departamento (modo mine) -->
+              @if (mode === 'mine') {
+                <td>
+                  <span class="tp-dept-badge">{{ t.destDepartment }}</span>
+                </td>
+              }
+
+              <!-- Data -->
+              <td class="tp-td-date">{{ formatDate(t.updatedAt) }}</td>
+
+              <!-- Seta -->
+              <td class="tp-td-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- ══ MODAL NOVO CHAMADO ══════════════════════════════════════════════════ -->
+@if (showNewModal()) {
+  <app-open-ticket-modal
+    (closed)="closeNew()"
+    (created)="onCreated($event)"
+  ></app-open-ticket-modal>
+}
+
+<!-- ══ MODAL DETALHES ══════════════════════════════════════════════════════ -->
+@if (detailTicket()) {
+  <div class="tp-dtl-backdrop" (click)="closeDetail()" aria-hidden="true"></div>
+  <div class="tp-dtl-modal" role="dialog" aria-modal="true" aria-label="Detalhes do chamado">
+
+    <div class="tp-dtl-header">
+      <div class="tp-dtl-header-left">
+        <span class="tp-dtl-num">{{ detailTicket()!.number }}</span>
+        <span class="tp-badge" [class]="getStatusClass(detailTicket()!.status)">
+          {{ statusLabels[detailTicket()!.status] }}
+        </span>
+        <span class="tp-badge" [class]="getPriorClass(detailTicket()!.priority)">
+          {{ priorityLabels[detailTicket()!.priority] }}
+        </span>
+      </div>
+      <button class="tp-dtl-close" (click)="closeDetail()" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="tp-dtl-body">
+      <h2 class="tp-dtl-title">{{ detailTicket()!.title }}</h2>
+      @if (detailTicket()!.description) {
+        <p class="tp-dtl-desc">{{ detailTicket()!.description }}</p>
+      }
+
+      <div class="tp-dtl-meta">
+        <div class="tp-dtl-meta-item">
+          <span class="tp-dtl-key">Solicitante</span>
+          <span>{{ detailTicket()!.requester?.fullName ?? '—' }}</span>
+        </div>
+        <div class="tp-dtl-meta-item">
+          <span class="tp-dtl-key">Departamento</span>
+          <span>{{ detailTicket()!.destDepartment }}</span>
+        </div>
+        <div class="tp-dtl-meta-item">
+          <span class="tp-dtl-key">Aberto em</span>
+          <span>{{ formatDate(detailTicket()!.createdAt) }}</span>
+        </div>
+        <div class="tp-dtl-meta-item">
+          <span class="tp-dtl-key">Atualizado em</span>
+          <span>{{ formatDate(detailTicket()!.updatedAt) }}</span>
+        </div>
+        @if (detailTicket()!.meta?.slaDeadline) {
+          <div class="tp-dtl-meta-item">
+            <span class="tp-dtl-key">Prazo SLA</span>
+            <span class="tp-sla" [class]="slaStatusClass(detailTicket()!)">
+              {{ slaLabel(detailTicket()!) }}
+            </span>
+          </div>
+        }
+        @if (detailTicket()!.meta?.valorEstimado != null) {
+          <div class="tp-dtl-meta-item">
+            <span class="tp-dtl-key">Valor estimado</span>
+            <span>{{ formatCurrency(detailTicket()!.meta!.valorEstimado) }}</span>
+          </div>
+        }
+        @if (detailTicket()!.meta?.nfPedido) {
+          <div class="tp-dtl-meta-item">
+            <span class="tp-dtl-key">NF / Pedido</span>
+            <span>{{ detailTicket()!.meta!.nfPedido }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Histórico -->
+      @if (detailTicket()!.history?.length) {
+        <div class="tp-dtl-section">
+          <h3 class="tp-dtl-section-title">Histórico</h3>
+          <div class="tp-history">
+            @for (h of detailTicket()!.history!; track h.id) {
+              <div class="tp-history-item">
+                <div class="tp-history-dot"></div>
+                <div class="tp-history-content">
+                  <div class="tp-history-meta">
+                    <span class="tp-history-author">{{ h.changedByName }}</span>
+                    <span class="tp-history-date">{{ formatDate(h.changedAt) }}</span>
+                  </div>
+                  @if (h.fieldName === 'status') {
+                    <p class="tp-history-change">
+                      Status: <strong>{{ getStatusLabel(h.oldValue) }}</strong> →
+                      <strong>{{ getStatusLabel(h.newValue) }}</strong>
+                    </p>
+                  }
+                  @if (h.note) { <p class="tp-history-note">{{ h.note }}</p> }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Atualizar -->
+      <div class="tp-dtl-section">
+        <h3 class="tp-dtl-section-title">Registrar atualização</h3>
+        <div class="tp-update-form">
+          <select class="tp-dtl-input" [(ngModel)]="newStatus">
+            @for (s of allStatuses; track s) {
+              <option [value]="s">{{ statusLabels[s] }}</option>
+            }
+          </select>
+          <textarea class="tp-dtl-input tp-dtl-textarea" rows="3"
+                    [(ngModel)]="newComment"
+                    placeholder="Comentário ou observação…"></textarea>
+          @if (updateError) {
+            <p class="tp-dtl-error" role="alert">{{ updateError }}</p>
+          }
+          <button class="tp-dtl-save" (click)="saveUpdate()" [disabled]="savingUpdate"
+                  [style.background]="accentColor">
+            @if (savingUpdate) { Salvando… } @else { Salvar }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

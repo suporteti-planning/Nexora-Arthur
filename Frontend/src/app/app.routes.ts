@@ -20,6 +20,18 @@ export const routes: Routes = [
   { path: 'doc', canActivate: [authGuard],
     loadComponent: () => import('./features/doc/doc-home').then(m => m.DocHomePage) },
 
+  // ── Meus Chamados (acompanhamento do usuário) ──────────────────────────
+  { path: 'meus-chamados', canActivate: [authGuard],
+    loadComponent: () => import('./features/tickets/meus-chamados/meus-chamados').then(m => m.MeusChamadosPage) },
+
+  // ── Painéis Departamentais ────────────────────────────────────────────
+  { path: 'rh', canActivate: [authGuard],
+    loadComponent: () => import('./features/departments/rh/rh-home').then(m => m.RhHomePage) },
+  { path: 'dp', canActivate: [authGuard],
+    loadComponent: () => import('./features/departments/dp/dp-home').then(m => m.DpHomePage) },
+  { path: 'financeiro', canActivate: [authGuard],
+    loadComponent: () => import('./features/departments/financeiro/financeiro-home').then(m => m.FinanceiroHomePage) },
+
   // ── Painel Admin de Usuários (TI / Admin) ─────────────────────────────────
   {
     path: 'admin',
