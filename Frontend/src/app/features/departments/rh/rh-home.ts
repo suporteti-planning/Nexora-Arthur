@@ -8,8 +8,8 @@ import { TicketPanel } from '../../tickets/ticket-panel/ticket-panel';
   imports: [DeptShell, TicketPanel],
   template: `
 <app-dept-shell
-  accentColor="#EC4899"
-  accentRgb="236,72,153"
+  accentColor="#10B981"
+  accentRgb="16,185,129"
   deptLabel="RH / GESTÃO DE GENTE"
   brandIconPath="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"
   [navItems]="navItems">
@@ -30,7 +30,7 @@ import { TicketPanel } from '../../tickets/ticket-panel/ticket-panel';
         mode="dept"
         dept="RH"
         variant="sla"
-        accentColor="#EC4899"
+        accentColor="#10B981"
         panelTitle="Chamados RH/GG"
       ></app-ticket-panel>
     </section>
@@ -39,11 +39,11 @@ import { TicketPanel } from '../../tickets/ticket-panel/ticket-panel';
   styles: [`
 .rh-page { display:flex; flex-direction:column; gap:1.5rem; }
 .rh-header { margin-bottom:.5rem; }
-.rh-label { font-size:.7rem; font-weight:700; color:rgba(236,72,153,.6); text-transform:uppercase; letter-spacing:.12em; margin:0 0 .2rem; }
+.rh-label { font-size:.7rem; font-weight:700; color:rgba(16,185,129,.6); text-transform:uppercase; letter-spacing:.12em; margin:0 0 .2rem; }
 .rh-title { font-size:1.5rem; font-weight:800; color:#fff; margin:0 0 .3rem; letter-spacing:-.025em; }
 .rh-sub   { font-size:.825rem; color:rgba(255,255,255,.4); margin:0; }
 .rh-section { }
-.rh-section-title { font-size:.75rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(236,72,153,.55); margin:0 0 .875rem; }
+.rh-section-title { font-size:.75rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(16,185,129,.55); margin:0 0 .875rem; }
   `],
 })
 export class RhHomePage {

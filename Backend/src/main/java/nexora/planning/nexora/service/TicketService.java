@@ -9,14 +9,22 @@ import nexora.planning.nexora.model.*;
 import nexora.planning.nexora.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -24,10 +32,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TicketService {
 
-    private final TicketRepository       ticketRepo;
-    private final TicketHistoryRepository historyRepo;
-    private final UserRepository         userRepo;
-    private final DocCatalogService      docCatalog;
+    private final TicketRepository            ticketRepo;
+    private final TicketHistoryRepository     historyRepo;
+    private final UserRepository              userRepo;
+    private final DocCatalogService           docCatalog;
+    private final TicketAttachmentRepository  attachmentRepo;
+
+    @Value("${app.upload.dir:uploads/tickets}")
+    private String uploadDir;
 
     // ── Criação ───────────────────────────────────────────────────────────────
 
@@ -112,7 +124,11 @@ public class TicketService {
     /** Detalhe por id. */
     @Transactional(readOnly = true)
     public TicketResponseDTO getById(Long id) {
-        return TicketResponseDTO.from(findTicket(id));
+        Ticket t = findTicket(id);
+        // força inicialização das coleções lazy dentro da transação
+        org.hibernate.Hibernate.initialize(t.getHistory());
+        org.hibernate.Hibernate.initialize(t.getAttachments());
+        return TicketResponseDTO.from(t);
     }
 
     // ── Atualização de status / responsável ───────────────────────────────────
@@ -143,6 +159,56 @@ public class TicketService {
 
         ticket.setUpdatedAt(LocalDateTime.now());
         return TicketResponseDTO.from(ticketRepo.save(ticket));
+    }
+
+    // ── Anexos ────────────────────────────────────────────────────────────────
+
+    @Transactional
+    public List<TicketResponseDTO.AttachmentDTO> addAttachments(
+            Long ticketId, List<MultipartFile> files, String uploaderUsername) {
+
+        Ticket ticket   = findTicket(ticketId);
+        User   uploader = findUser(uploaderUsername);
+
+        Path dir = Paths.get(uploadDir, String.valueOf(ticketId));
+        try { Files.createDirectories(dir); } catch (IOException e) {
+            throw new RuntimeException("Falha ao criar diretório de uploads", e);
+        }
+
+        return files.stream().map(file -> {
+            String originalName = file.getOriginalFilename() != null
+                ? file.getOriginalFilename() : "arquivo";
+            String safeName = UUID.randomUUID() + "_" + originalName
+                .replaceAll("[^a-zA-Z0-9._\\-]", "_");
+            Path target = dir.resolve(safeName);
+
+            try { Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING); }
+            catch (IOException e) { throw new RuntimeException("Falha ao salvar " + originalName, e); }
+
+            TicketAttachment att = TicketAttachment.builder()
+                .ticket(ticket)
+                .fileName(originalName)
+                .filePath(target.toString())
+                .contentType(file.getContentType())
+                .fileSize(file.getSize())
+                .uploadedBy(uploader)
+                .uploadedAt(LocalDateTime.now())
+                .build();
+
+            return TicketResponseDTO.AttachmentDTO.from(attachmentRepo.save(att));
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<TicketResponseDTO.AttachmentDTO> listAttachments(Long ticketId) {
+        return attachmentRepo.findByTicketId(ticketId)
+            .stream().map(TicketResponseDTO.AttachmentDTO::from).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public TicketAttachment requireAttachment(Long attachmentId) {
+        return attachmentRepo.findById(attachmentId)
+            .orElseThrow(() -> new IllegalArgumentException("Anexo não encontrado: " + attachmentId));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

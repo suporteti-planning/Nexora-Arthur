@@ -114,57 +114,75 @@
           <span>Início</span>
         </a>
 
-        <a routerLink="/backoffice/dashboard" routerLinkActive="hm-nav-item--active"
-           class="hm-nav-item" aria-label="Suporte TI">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
-          </svg>
-          <span>Suporte TI</span>
-        </a>
+        @if (isTI()) {
+          <a routerLink="/ti/chamados" routerLinkActive="hm-nav-item--active"
+             class="hm-nav-item" aria-label="Painel Chamados TI">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+            </svg>
+            <span>Painel TI</span>
+          </a>
 
-        <a routerLink="/backoffice/employees" routerLinkActive="hm-nav-item--active"
-           class="hm-nav-item" aria-label="Colaboradores">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-          <span>Colaboradores</span>
-        </a>
+          <a routerLink="/backoffice" routerLinkActive="hm-nav-item--active"
+             class="hm-nav-item" aria-label="Intranet — Backoffice">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span>Intranet</span>
+          </a>
 
-        <a routerLink="/backoffice/equipment-inventory" routerLinkActive="hm-nav-item--active"
-           class="hm-nav-item" aria-label="Inventário">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <rect x="2" y="7" width="20" height="14" rx="2"/>
-            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-          </svg>
-          <span>Inventário</span>
-        </a>
+          <a routerLink="/backoffice/dashboard" routerLinkActive="hm-nav-item--active"
+             class="hm-nav-item" aria-label="Suporte TI">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+            </svg>
+            <span>Suporte TI</span>
+          </a>
 
-        <a routerLink="/backoffice/licenses" routerLinkActive="hm-nav-item--active"
-           class="hm-nav-item" aria-label="Licenças Microsoft">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/>
-            <path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20"/>
-          </svg>
-          <span>Licenças Microsoft</span>
-        </a>
+          <a routerLink="/backoffice/employees" routerLinkActive="hm-nav-item--active"
+             class="hm-nav-item" aria-label="Colaboradores">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>Colaboradores</span>
+          </a>
 
-        <a routerLink="/backoffice/password-vault" routerLinkActive="hm-nav-item--active"
-           class="hm-nav-item" aria-label="Cofre de Senhas">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <rect x="4" y="10" width="16" height="11" rx="2"/>
-            <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
-            <circle cx="12" cy="15" r="1"/>
-            <path d="M12 16v2"/>
-          </svg>
-          <span>Cofre de Senhas</span>
-        </a>
+          <a routerLink="/backoffice/equipment-inventory" routerLinkActive="hm-nav-item--active"
+             class="hm-nav-item" aria-label="Inventário">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="2" y="7" width="20" height="14" rx="2"/>
+              <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+            </svg>
+            <span>Inventário</span>
+          </a>
+
+          <a routerLink="/backoffice/licenses" routerLinkActive="hm-nav-item--active"
+             class="hm-nav-item" aria-label="Licenças Microsoft">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/>
+              <path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20"/>
+            </svg>
+            <span>Licenças Microsoft</span>
+          </a>
+
+          <a routerLink="/backoffice/password-vault" routerLinkActive="hm-nav-item--active"
+             class="hm-nav-item" aria-label="Cofre de Senhas">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="4" y="10" width="16" height="11" rx="2"/>
+              <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+              <circle cx="12" cy="15" r="1"/>
+              <path d="M12 16v2"/>
+            </svg>
+            <span>Cofre de Senhas</span>
+          </a>
+        }
       </nav>
 
       <!-- DEPARTAMENTOS -->
       <nav class="hm-nav-section" aria-label="Departamentos">
-        @if (user()?.teamRole === 'ROLE_TI' || user()?.teamRole === 'ROLE_ADMIN') {
+        @if (isTI()) {
           <p class="hm-nav-label" aria-hidden="true">ADMINISTRAÇÃO</p>
           <a routerLink="/admin/users" routerLinkActive="hm-nav-item--active"
              class="hm-nav-item" aria-label="Gestão de Usuários">
@@ -175,25 +193,36 @@
             </svg>
             <span>Gestão de Usuários</span>
           </a>
-        }
-        <p class="hm-nav-label" aria-hidden="true">DEPARTAMENTOS</p>
-
-        @for (item of deptNavItems; track item.label) {
-          @if (item.route) {
-            <a [routerLink]="item.route" routerLinkActive="hm-nav-item--active"
-               class="hm-nav-item hm-nav-item--dept" [attr.aria-label]="item.label" [title]="item.label">
+          <p class="hm-nav-label" aria-hidden="true">DEPARTAMENTOS</p>
+          @for (item of deptNavItems; track item.label) {
+            @if (item.route) {
+              <a [routerLink]="item.route" routerLinkActive="hm-nav-item--active"
+                 class="hm-nav-item hm-nav-item--dept" [attr.aria-label]="item.label" [title]="item.label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path [attr.d]="item.icon"/>
+                </svg>
+                <span>{{ item.label }}</span>
+              </a>
+            } @else {
+              <div class="hm-nav-item hm-nav-item--dept" [attr.aria-label]="item.label" [title]="item.label + ' — Em breve'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path [attr.d]="item.icon"/>
+                </svg>
+                <span>{{ item.label }}</span>
+              </div>
+            }
+          }
+        } @else {
+          <!-- Usuário comum: só vê o painel do seu departamento -->
+          <p class="hm-nav-label" aria-hidden="true">MEU DEPARTAMENTO</p>
+          @if (userDeptRoute()) {
+            <a [routerLink]="userDeptRoute()" routerLinkActive="hm-nav-item--active"
+               class="hm-nav-item" [attr.aria-label]="'Painel ' + (user()?.department ?? '')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path [attr.d]="item.icon"/>
+                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11l2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6"/>
               </svg>
-              <span>{{ item.label }}</span>
+              <span>Painel {{ user()?.department }}</span>
             </a>
-          } @else {
-            <div class="hm-nav-item hm-nav-item--dept" [attr.aria-label]="item.label" [title]="item.label + ' — Em breve'">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path [attr.d]="item.icon"/>
-              </svg>
-              <span>{{ item.label }}</span>
-            </div>
           }
         }
       </nav>
@@ -331,24 +360,7 @@
         }
       </section>
 
-      <!-- Tickets section (structural — no API exists yet) -->
-      <section class="hm-section" aria-label="Chamados recentes">
-        <div class="hm-section-header">
-          <div class="hm-section-title-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-            <h2 class="hm-section-title">CHAMADOS RECENTES</h2>
-          </div>
-        </div>
-        <div class="hm-tickets-empty" role="status">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/>
-          </svg>
-          <p>Integração de chamados em desenvolvimento.</p>
-          <span class="hm-tickets-sub">Os chamados aparecerão aqui quando o módulo estiver disponível.</span>
-        </div>
-      </section>
+
 
     </main>
   </div><!-- /hm-body -->

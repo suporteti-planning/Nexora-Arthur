@@ -31,6 +31,9 @@ export const routes: Routes = [
     loadComponent: () => import('./features/departments/dp/dp-home').then(m => m.DpHomePage) },
   { path: 'financeiro', canActivate: [authGuard],
     loadComponent: () => import('./features/departments/financeiro/financeiro-home').then(m => m.FinanceiroHomePage) },
+  // Painel TI de chamados (rota separada da /home)
+  { path: 'ti/chamados', canActivate: [authGuard, roleGuard('ROLE_TI', 'ROLE_ADMIN')],
+    loadComponent: () => import('./features/tickets/ti-panel/ti-panel').then(m => m.TiPanelPage) },
 
   // ── Painel Admin de Usuários (TI / Admin) ─────────────────────────────────
   {

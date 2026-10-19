@@ -93,6 +93,37 @@
             <span>Chamados DOC permitem adicionar múltiplas etapas sequenciais no próximo passo.</span>
           </div>
         }
+
+        <!-- Anexos -->
+        <div class="otm-field">
+          <label class="otm-file-label">
+            <span class="otm-label">Anexos</span>
+            <div class="otm-file-drop" (click)="fileInput.click()" (keydown.enter)="fileInput.click()" tabindex="0" role="button" aria-label="Adicionar anexos">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+              <span>Clique para adicionar arquivos ou arraste aqui</span>
+            </div>
+            <input #fileInput type="file" class="otm-file-input" multiple
+                   accept=".xlsx,.csv,.png,.jpeg,.jpg,.pdf,.doc,.docx"
+                   (change)="onFilesSelected($event)" />
+          </label>
+          <span class="otm-file-hint">Formatos aceitos: xlsx, csv, png, jpeg, pdf, doc, docx</span>
+          @if (selectedFiles.length > 0) {
+            <div class="otm-file-chips">
+              @for (f of selectedFiles; track $index) {
+                <span class="otm-file-chip">
+                  {{ f.name }}
+                  <button type="button" (click)="removeFile($index)" [attr.aria-label]="'Remover ' + f.name">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </span>
+              }
+            </div>
+          }
+        </div>
       </div>
     }
 

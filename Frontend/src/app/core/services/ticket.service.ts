@@ -62,6 +62,15 @@ export interface HistoryEntry {
   changedAt:     string;
 }
 
+export interface AttachmentResponse {
+  id:          number;
+  fileName:    string;
+  contentType: string;
+  fileSize?:   number;
+  uploadedAt:  string;
+  downloadUrl: string;
+}
+
 export interface TicketResponse {
   id:                 number;
   number:             string;
@@ -80,6 +89,7 @@ export interface TicketResponse {
   docDetail?:         DocDetailResponse;
   meta?:              TicketMeta;
   history?:           HistoryEntry[];
+  attachments?:       AttachmentResponse[];
 }
 
 export interface Page<T> {
@@ -189,5 +199,18 @@ export class TicketService {
         return t ? of(t) : of(null as unknown as TicketResponse);
       }),
     );
+  }
+
+  /** Envia arquivos para um chamado existente. Sem fallback local (requer backend). */
+  uploadAttachments(ticketId: number, files: File[]): Observable<AttachmentResponse[]> {
+    const form = new FormData();
+    files.forEach(f => form.append('files', f, f.name));
+    return this.http.post<AttachmentResponse[]>(`${this.api}/${ticketId}/attachments`, form);
+  }
+
+  /** URL de download/visualização de um anexo. */
+  attachmentDownloadUrl(downloadUrl: string): string {
+    // downloadUrl já é relativo ex: /api/tickets/attachments/1/download
+    return `${environment.apiUrl}${downloadUrl}`;
   }
 }

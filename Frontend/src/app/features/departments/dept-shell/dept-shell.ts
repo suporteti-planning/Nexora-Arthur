@@ -217,37 +217,42 @@ export class DeptShell implements OnInit, AfterViewInit, OnDestroy {
 
   private draw(ctx:CanvasRenderingContext2D, cv:HTMLCanvasElement, dpr:number): void {
     const W=cv.width/dpr, H=cv.height/dpr, cx=W*.5, cy=H*.5;
-    ctx.fillStyle='#0B0F0D'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#0d1117'; ctx.fillRect(0,0,W,H);
+    // BG radial — menos saturado
     const bg=ctx.createRadialGradient(cx,cy*.6,0,cx,cy*.6,W*.65);
-    bg.addColorStop(0,'rgba(0,80,30,.18)'); bg.addColorStop(1,'transparent');
+    bg.addColorStop(0,'rgba(10,40,25,.12)'); bg.addColorStop(1,'transparent');
     ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-    const mg=ctx.createRadialGradient(this.mx,this.my,0,this.mx,this.my,260);
-    mg.addColorStop(0,'rgba(0,255,102,.04)'); mg.addColorStop(1,'transparent');
+    // mouse glow suave
+    const mg=ctx.createRadialGradient(this.mx,this.my,0,this.mx,this.my,220);
+    mg.addColorStop(0,'rgba(0,200,100,.025)'); mg.addColorStop(1,'transparent');
     ctx.fillStyle=mg; ctx.fillRect(0,0,W,H);
-    const MD=155, MD2=MD*MD;
+    // linhas entre nós — mais escuras
+    const MD=140, MD2=MD*MD;
     for (let i=0;i<this.nodes.length;i++) {
       const a=this.nodes[i];
       for (let j=i+1;j<this.nodes.length;j++) {
         const b=this.nodes[j], dx=a.x-b.x, dy=a.y-b.y, dSq=dx*dx+dy*dy;
         if(dSq>MD2)continue;
-        const r=1-Math.sqrt(dSq)/MD, alpha=(0.05+r*.16)*Math.min(a.br,b.br);
+        const r=1-Math.sqrt(dSq)/MD, alpha=(0.025+r*.08)*Math.min(a.br,b.br);
         ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
-        ctx.strokeStyle=`rgba(0,220,90,${alpha})`;ctx.lineWidth=.5+r*.55;ctx.stroke();
+        ctx.strokeStyle=`rgba(80,160,110,${alpha})`;ctx.lineWidth=.4+r*.45;ctx.stroke();
       }
     }
+    // nós — menos brilhantes
     for (const n of this.nodes) {
-      const pf=.85+.15*Math.sin(n.pulse), r=n.r*pf;
+      const pf=.88+.12*Math.sin(n.pulse), r=n.r*pf;
       const md=Math.sqrt((this.mx-n.x)**2+(this.my-n.y)**2);
-      const br=Math.min(1,n.br+(md<140?.45*(1-md/140):0));
-      const h=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,r*5);
-      h.addColorStop(0,`rgba(0,255,102,${.05*br})`);h.addColorStop(1,'transparent');
-      ctx.beginPath();ctx.arc(n.x,n.y,r*5,0,Math.PI*2);ctx.fillStyle=h;ctx.fill();
+      const br=Math.min(.75,n.br*.7+(md<140?.3*(1-md/140):0));
+      const h=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,r*4);
+      h.addColorStop(0,`rgba(0,200,100,${.03*br})`);h.addColorStop(1,'transparent');
+      ctx.beginPath();ctx.arc(n.x,n.y,r*4,0,Math.PI*2);ctx.fillStyle=h;ctx.fill();
       const c=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,r);
-      c.addColorStop(0,`rgba(180,255,200,${br})`);c.addColorStop(.5,`rgba(0,255,90,${br*.85})`);c.addColorStop(1,`rgba(0,180,60,${br*.3})`);
+      c.addColorStop(0,`rgba(160,220,180,${br})`);c.addColorStop(.5,`rgba(0,180,80,${br*.7})`);c.addColorStop(1,`rgba(0,120,50,${br*.25})`);
       ctx.beginPath();ctx.arc(n.x,n.y,r,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();
     }
-    const v=ctx.createRadialGradient(cx,cy,H*.35,cx,cy,H*.85);
-    v.addColorStop(0,'transparent');v.addColorStop(1,'rgba(11,15,13,.72)');
+    // vinheta mais forte
+    const v=ctx.createRadialGradient(cx,cy,H*.28,cx,cy,H*.88);
+    v.addColorStop(0,'transparent');v.addColorStop(1,'rgba(10,15,12,.82)');
     ctx.fillStyle=v;ctx.fillRect(0,0,W,H);
   }
 }

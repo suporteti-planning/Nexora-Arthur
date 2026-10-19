@@ -382,13 +382,22 @@ export class LoginPage implements OnInit, AfterViewInit, OnDestroy {
 
   private navigateHome(): void {
     this.loading = false;
+    const user = this.auth.sessionUser();
+    const isFullAccess = this.auth.isFullAccess();
+    const deptMap: Record<string, string> = {
+      DOC: '/doc', RH: '/rh', 'RH/GG': '/rh',
+      DP: '/dp', FINANCEIRO: '/financeiro', 'FINANCEIRO/COMPRAS': '/financeiro',
+    };
+    const dept = user?.department?.toUpperCase() ?? '';
+    const target = isFullAccess ? '/home' : (deptMap[dept] ?? '/home');
+
     if (this.formCard?.nativeElement) {
       gsap.to(this.formCard.nativeElement, {
         opacity: 0, y: -10, duration: 0.3, ease: 'power2.in',
-        onComplete: () => { void this.router.navigate(['/home']); },
+        onComplete: () => { void this.router.navigate([target]); },
       });
     } else {
-      void this.router.navigate(['/home']);
+      void this.router.navigate([target]);
     }
   }
 

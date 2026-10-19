@@ -45,6 +45,19 @@ export class AuthService {
   private readonly _sessionUser = signal<SessionUser | null>(this.loadUserFromStorage());
   readonly sessionUser = this._sessionUser.asReadonly();
   readonly isLoggedIn  = computed(() => this._sessionUser() !== null);
+  /** true para qualquer sessão demo (@demo.local ou ROLE_DEMO) */
+  readonly isDemo      = computed(() => {
+    const u = this._sessionUser();
+    return u?.email?.endsWith('@demo.local') === true || u?.role === 'ROLE_DEMO';
+  });
+  /** true para TI, Admin e usuários demo — acesso completo ao sistema */
+  readonly isFullAccess = computed(() => {
+    const u = this._sessionUser();
+    if (!u) return false;
+    const r = u.teamRole ?? u.role;
+    return r === 'ROLE_TI' || r === 'ROLE_ADMIN' || r === 'ROLE_DEMO'
+        || u.email?.endsWith('@demo.local') === true;
+  });
 
   constructor(private readonly http: HttpClient, private readonly router: Router) {}
 

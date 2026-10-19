@@ -736,3 +736,18 @@
   border-top: 1px solid rgba(0,255,128,.07);
   padding-top: .75rem;
 }
+
+/* ── Painel TI de Chamados ──────────────────────────────────────────────── */
+.hm-ti-panel {
+  background: rgba(17,20,19,.82);
+  backdrop-filter: blur(10px);
+  border: 1px solid #282a2d;
+}
+
+.hm-ti-panel .hm-section-header {
+  border-bottom: 1px solid #282a2d;
+}
+
+.hm-ti-panel-body {
+  padding: 1.25rem 1.25rem 1rem;
+}

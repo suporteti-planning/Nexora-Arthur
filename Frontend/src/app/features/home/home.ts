@@ -67,11 +67,28 @@ export class HomePage implements OnInit, AfterViewInit, OnDestroy {
     { label: 'Desenvolvimento',    icon: 'M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25z' },
   ];
 
+  // ── RBAC helpers ─────────────────────────────────────────────────────────
+  readonly isTI = computed(() => {
+    const u = this.user();
+    if (!u) return false;
+    const r = u.teamRole ?? u.role ?? '';
+    return r === 'ROLE_TI' || r === 'ROLE_ADMIN'
+        || r === 'ROLE_DEMO' || u.email?.endsWith('@demo.local') === true;
+  });
+
+  readonly userDeptRoute = computed<string | null>(() => {
+    const dept = this.user()?.department?.toUpperCase();
+    const map: Record<string,string> = {
+      DOC: '/doc', RH: '/rh', DP: '/dp', FINANCEIRO: '/financeiro',
+      'RH/GG': '/rh', 'FINANCEIRO/COMPRAS': '/financeiro',
+    };
+    return dept ? (map[dept] ?? null) : null;
+  });
+
   // ── UI state ──────────────────────────────────────────────────────────────
   accountMenuOpen  = signal(false);
   sidebarCollapsed = signal(false);
   searchQuery      = signal('');
-  activeSection    = signal<'home' | 'ti'>('home');
 
   // ── Ticket modal ──────────────────────────────────────────────────────────
   showTicketModal  = signal(false);

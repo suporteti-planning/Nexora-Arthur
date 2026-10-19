@@ -4,6 +4,7 @@ import nexora.planning.nexora.enums.DestDepartment;
 import nexora.planning.nexora.enums.TicketPriority;
 import nexora.planning.nexora.enums.TicketStatus;
 import nexora.planning.nexora.model.Ticket;
+import nexora.planning.nexora.model.TicketAttachment;
 import lombok.Builder;
 import lombok.Data;
 
@@ -29,7 +30,8 @@ public class TicketResponseDTO {
     private LocalDateTime   closedAt;
     private String          sourceRoute;
     private DocDetailDTO    docDetail;
-    private List<HistoryDTO> history;
+    private List<HistoryDTO>    history;
+    private List<AttachmentDTO> attachments;
 
     public static TicketResponseDTO from(Ticket t) {
         return TicketResponseDTO.builder()
@@ -50,6 +52,8 @@ public class TicketResponseDTO {
             .docDetail(t.getDocDetail() != null ? DocDetailDTO.from(t.getDocDetail()) : null)
             .history(t.getHistory() == null ? List.of() :
                 t.getHistory().stream().map(HistoryDTO::from).collect(Collectors.toList()))
+            .attachments(t.getAttachments() == null ? List.of() :
+                t.getAttachments().stream().map(AttachmentDTO::from).collect(Collectors.toList()))
             .build();
     }
 
@@ -122,6 +126,28 @@ public class TicketResponseDTO {
                 .newValue(h.getNewValue())
                 .note(h.getNote())
                 .changedAt(h.getChangedAt())
+                .build();
+        }
+    }
+
+    @Data @Builder
+    public static class AttachmentDTO {
+        private Long          id;
+        private String        fileName;
+        private String        contentType;
+        private Long          fileSize;
+        private LocalDateTime uploadedAt;
+        /** URL relativa para download via /api/tickets/attachments/{id}/download */
+        private String        downloadUrl;
+
+        public static AttachmentDTO from(TicketAttachment a) {
+            return AttachmentDTO.builder()
+                .id(a.getId())
+                .fileName(a.getFileName())
+                .contentType(a.getContentType())
+                .fileSize(a.getFileSize())
+                .uploadedAt(a.getUploadedAt())
+                .downloadUrl("/api/tickets/attachments/" + a.getId() + "/download")
                 .build();
         }
     }

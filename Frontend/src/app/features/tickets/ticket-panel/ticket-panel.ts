@@ -1,14 +1,10 @@
 /**
  * TicketPanel — Componente base reutilizável de acompanhamento de chamados.
  *
- * Modos de operação via @Input() mode:
- *   'mine'       → chamados abertos pelo usuário logado (acompanhamento pessoal)
- *   'dept'       → fila do departamento (gestão interna)
+ * Modos: 'mine' | 'dept'
+ * Variantes: 'default' | 'sla' | 'financeiro'
  *
- * Variações contextuais via @Input() variant:
- *   'default'    → padrão (DOC, TI, Risco)
- *   'sla'        → destaca Prioridade e SLA (RH/GG, DP)
- *   'financeiro' → campos Valor Estimado e NF/Pedido
+ * Quando dept='TI', exibe bloco de ações TI (Capturar / Finalizar / Pausar).
  */
 import {
   Component, Input, Output, EventEmitter, OnInit, OnChanges,
@@ -26,10 +22,7 @@ import { OpenTicketModal } from '../open-ticket-modal/open-ticket-modal';
 export type PanelMode    = 'mine' | 'dept';
 export type PanelVariant = 'default' | 'sla' | 'financeiro';
 
-interface StatusFilter {
-  value: TicketStatus | '';
-  label: string;
-}
+interface StatusFilter { value: TicketStatus | ''; label: string; }
 
 @Component({
   selector: 'app-ticket-panel',
@@ -39,26 +32,22 @@ interface StatusFilter {
   styleUrl:    './ticket-panel.css',
 })
 export class TicketPanel implements OnInit, OnChanges {
-  /** 'mine' = meus chamados | 'dept' = fila do departamento */
   @Input() mode: PanelMode = 'mine';
-  /** Variante visual e funcional */
   @Input() variant: PanelVariant = 'default';
-  /** Departamento destino (obrigatório quando mode='dept') */
   @Input() dept?: DestDepartment;
-  /** Cor de destaque do departamento (CSS color string) */
-  @Input() accentColor = '#00FF66';
-  /** Título exibido no cabeçalho do painel */
-  @Input() panelTitle = 'Chamados';
-  /** Subtítulo */
-  @Input() panelSub   = '';
-  /** Emite quando um chamado é criado (número) */
+  @Input() accentColor = '#0ae18c';
+  @Input() panelTitle  = 'Chamados';
+  @Input() panelSub    = '';
   @Output() ticketCreatedEvt = new EventEmitter<string>();
 
-  private readonly ticketSvc = inject(TicketService);
+  readonly ticketSvc = inject(TicketService);
   private readonly auth      = inject(AuthService);
   private readonly cdr       = inject(ChangeDetectorRef);
 
   readonly user = this.auth.sessionUser;
+
+  /** true quando este painel é do departamento TI */
+  get isTiPanel(): boolean { return this.dept === 'TI'; }
 
   // ── State ─────────────────────────────────────────────────────────────────
   allTickets  = signal<TicketResponse[]>([]);
@@ -74,11 +63,9 @@ export class TicketPanel implements OnInit, OnChanges {
   ];
   activeFilters = signal<Set<TicketStatus | ''>>(new Set(['NOVO', 'EM_ANDAMENTO']));
 
-  // ── Modal abertura ────────────────────────────────────────────────────────
   showNewModal  = signal(false);
   createdNumber = signal<string | null>(null);
 
-  // ── Modal detalhe ─────────────────────────────────────────────────────────
   detailTicket  = signal<TicketResponse | null>(null);
   newComment    = '';
   newStatus: TicketStatus | '' = '';
@@ -110,14 +97,11 @@ export class TicketPanel implements OnInit, OnChanges {
     const open = all.filter(t => t.status === 'NOVO' || t.status === 'EM_ANDAMENTO').length;
     const done = all.filter(t => t.status === 'RESOLVIDO').length;
     const wait = all.filter(t => t.status === 'AGUARDANDO').length;
-    const urgent = all.filter(t => t.priority === 'URGENTE' && t.status !== 'RESOLVIDO').length;
-
-    // SLA vencidos (modo SLA)
+    const urgent  = all.filter(t => t.priority === 'URGENTE' && t.status !== 'RESOLVIDO').length;
     const overdue = all.filter(t => {
       if (!t.meta?.slaDeadline) return false;
       return new Date(t.meta.slaDeadline) < new Date() && t.status !== 'RESOLVIDO';
     }).length;
-
     return { open, done, wait, urgent, overdue, total: all.length };
   });
 
@@ -135,7 +119,6 @@ export class TicketPanel implements OnInit, OnChanges {
     const obs = this.mode === 'mine'
       ? this.ticketSvc.getMine(0, 200)
       : this.ticketSvc.getByDept(this.dept!, 0, 200);
-
     obs.subscribe({
       next:  pg => { this.allTickets.set(pg.content); this.loading.set(false); this.cdr.markForCheck(); },
       error: ()  => { this.loading.set(false); this.loadError.set(true); this.cdr.markForCheck(); },
@@ -145,9 +128,7 @@ export class TicketPanel implements OnInit, OnChanges {
   // ── Filters ───────────────────────────────────────────────────────────────
   toggleFilter(v: TicketStatus | ''): void {
     this.activeFilters.update(s => {
-      const n = new Set(s);
-      n.has(v) ? n.delete(v) : n.add(v);
-      return n;
+      const n = new Set(s); n.has(v) ? n.delete(v) : n.add(v); return n;
     });
   }
   isFilterActive(v: TicketStatus | ''): boolean { return this.activeFilters().has(v); }
@@ -174,34 +155,99 @@ export class TicketPanel implements OnInit, OnChanges {
   }
   closeDetail(): void { this.detailTicket.set(null); }
 
+  // ── Botões rápidos de status ──────────────────────────────────────────────
+  quickStatus(status: TicketStatus): void {
+    const t = this.detailTicket();
+    if (!t || t.status === status) return;
+    this._doUpdate(t, { status }, `Status alterado para ${this.statusLabels[status]}.`);
+  }
+
+  // ── Botões TI ─────────────────────────────────────────────────────────────
+  tiCapturar(): void {
+    const t = this.detailTicket();
+    if (!t) return;
+    const me = this.user()?.displayName;
+    this._doUpdate(t, { status: 'EM_ANDAMENTO' }, me ? `Capturado por ${me}.` : 'Chamado capturado.');
+  }
+
+  tiFinalizar(): void {
+    const t = this.detailTicket();
+    if (!t) return;
+    const me = this.user()?.displayName;
+    this._doUpdate(t, { status: 'RESOLVIDO' }, me ? `Finalizado por ${me}.` : 'Chamado finalizado.');
+  }
+
+  tiPausar(): void {
+    const t = this.detailTicket();
+    if (!t) return;
+    const me = this.user()?.displayName;
+    this._doUpdate(t, { status: 'AGUARDANDO' }, me ? `Pausado por ${me}.` : 'Chamado pausado.');
+  }
+
+  // ── saveUpdate (formulário manual) ────────────────────────────────────────
   saveUpdate(): void {
     const t = this.detailTicket();
     if (!t) return;
     if (!this.newComment.trim() && (!this.newStatus || this.newStatus === t.status)) {
       this.updateError = 'Informe um comentário ou altere o status.'; return;
     }
-    this.savingUpdate = true;
-    this.updateError  = '';
     const req: TicketUpdateRequest = {
       status: (this.newStatus && this.newStatus !== t.status) ? this.newStatus as TicketStatus : undefined,
       note:   this.newComment.trim() || undefined,
     };
-    this.ticketSvc.update(t.id, req).subscribe({
+    this._doUpdate(t, req, undefined, true);
+  }
+
+  private _doUpdate(
+    t: TicketResponse,
+    req: TicketUpdateRequest,
+    fallbackNote?: string,
+    fromForm = false,
+  ): void {
+    if (this.savingUpdate) return;
+    this.savingUpdate = true;
+    this.updateError  = '';
+    const payload: TicketUpdateRequest = {
+      ...req,
+      note: req.note ?? fallbackNote,
+    };
+    this.ticketSvc.update(t.id, payload).subscribe({
       next: updated => {
         this.savingUpdate = false;
         if (updated) {
           this.detailTicket.set(updated);
           this.allTickets.update(all => all.map(x => x.id === updated.id ? updated : x));
+          if (fromForm) {
+            this.newComment = '';
+            this.newStatus  = updated.status;
+          }
         }
-        this.newComment  = '';
-        this.newStatus   = updated?.status ?? t.status;
         this.cdr.markForCheck();
       },
-      error: () => { this.savingUpdate = false; this.updateError = 'Erro ao salvar.'; this.cdr.markForCheck(); },
+      error: () => {
+        this.savingUpdate = false;
+        this.updateError  = 'Erro ao salvar. Tente novamente.';
+        this.cdr.markForCheck();
+      },
     });
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+  isImage(ct?: string):    boolean { return !!ct && ct.startsWith('image/'); }
+  isPdf(ct?: string):      boolean { return ct === 'application/pdf'; }
+  isViewable(ct?: string): boolean { return this.isImage(ct) || this.isPdf(ct); }
+
+  /** URL absoluta para download — prefixada com apiUrl */
+  attachmentUrl(relUrl: string): string {
+    return this.ticketSvc.attachmentDownloadUrl(relUrl);
+  }
+
+  formatBytes(bytes: number): string {
+    if (bytes < 1024)       return `${bytes} B`;
+    if (bytes < 1048576)    return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / 1048576).toFixed(1)} MB`;
+  }
+
   getStatusClass(s: TicketStatus): string {
     return ({ NOVO:'tp-novo', EM_ANDAMENTO:'tp-andamento', AGUARDANDO:'tp-aguardando',
               RESOLVIDO:'tp-resolvido', CANCELADO:'tp-cancelado' })[s] ?? '';
@@ -225,15 +271,14 @@ export class TicketPanel implements OnInit, OnChanges {
   slaStatusClass(t: TicketResponse): string {
     if (!t.meta?.slaDeadline || t.status === 'RESOLVIDO') return '';
     const diff = new Date(t.meta.slaDeadline).getTime() - Date.now();
-    if (diff < 0)              return 'sla-overdue';
-    if (diff < 86400000)       return 'sla-critical'; // < 1 dia
-    if (diff < 86400000 * 3)   return 'sla-warning';  // < 3 dias
+    if (diff < 0)            return 'sla-overdue';
+    if (diff < 86400000)     return 'sla-critical';
+    if (diff < 86400000 * 3) return 'sla-warning';
     return 'sla-ok';
   }
   slaLabel(t: TicketResponse): string {
     if (!t.meta?.slaDeadline) return '—';
-    const d = new Date(t.meta.slaDeadline);
-    return d.toLocaleDateString('pt-BR');
+    return new Date(t.meta.slaDeadline).toLocaleDateString('pt-BR');
   }
   trackById(_: number, t: TicketResponse): number { return t.id; }
 }

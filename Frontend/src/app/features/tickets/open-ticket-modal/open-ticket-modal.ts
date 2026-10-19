@@ -74,6 +74,7 @@ export class OpenTicketModal implements OnInit {
 
   loading  = false;
   errorMsg = '';
+  selectedFiles: File[] = [];
 
   get isDoc(): boolean { return this.destDept === 'DOC'; }
   get pendingNeedsEmail(): boolean { return !!this.pendingStep?.requiresEmailAddress; }
@@ -159,6 +160,22 @@ export class OpenTicketModal implements OnInit {
     }
   }
 
+  onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files) return;
+    const incoming = Array.from(input.files);
+    // Evita duplicatas por nome
+    const existing = new Set(this.selectedFiles.map(f => f.name));
+    for (const f of incoming) {
+      if (!existing.has(f.name)) { this.selectedFiles = [...this.selectedFiles, f]; existing.add(f.name); }
+    }
+    input.value = ''; // reset para permitir re-selecionar o mesmo arquivo
+  }
+
+  removeFile(index: number): void {
+    this.selectedFiles = this.selectedFiles.filter((_, i) => i !== index);
+  }
+
   // ── Submit ────────────────────────────────────────────────────────────────
   submit(): void {
     this.loading  = true;
@@ -193,7 +210,16 @@ export class OpenTicketModal implements OnInit {
     }
 
     this.ticketSvc.create(req).subscribe({
-      next:  t => { this.loading = false; this.created.emit(t.number); },
+      next: t => {
+        if (this.selectedFiles.length > 0) {
+          // envia anexos em paralelo; falhas não bloqueiam a confirmação
+          this.ticketSvc.uploadAttachments(t.id, this.selectedFiles).subscribe({
+            error: () => {} // silencia — ticket já criado
+          });
+        }
+        this.loading = false;
+        this.created.emit(t.number);
+      },
       error: err => {
         this.loading  = false;
         this.errorMsg = err?.error?.message ?? 'Erro ao abrir o chamado.';

@@ -8,8 +8,8 @@ import { TicketPanel } from '../../tickets/ticket-panel/ticket-panel';
   imports: [DeptShell, TicketPanel],
   template: `
 <app-dept-shell
-  accentColor="#F59E0B"
-  accentRgb="245,158,11"
+  accentColor="#10B981"
+  accentRgb="16,185,129"
   deptLabel="DEPARTAMENTO PESSOAL"
   brandIconPath="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"
   [navItems]="navItems">
@@ -27,7 +27,7 @@ import { TicketPanel } from '../../tickets/ticket-panel/ticket-panel';
         mode="dept"
         dept="DP"
         variant="sla"
-        accentColor="#F59E0B"
+        accentColor="#10B981"
         panelTitle="Chamados DP"
       ></app-ticket-panel>
     </section>
@@ -35,10 +35,10 @@ import { TicketPanel } from '../../tickets/ticket-panel/ticket-panel';
 </app-dept-shell>`,
   styles: [`
 .dp-page { display:flex; flex-direction:column; gap:1.5rem; }
-.dp-label { font-size:.7rem; font-weight:700; color:rgba(245,158,11,.6); text-transform:uppercase; letter-spacing:.12em; margin:0 0 .2rem; }
+.dp-label { font-size:.7rem; font-weight:700; color:rgba(16,185,129,.6); text-transform:uppercase; letter-spacing:.12em; margin:0 0 .2rem; }
 .dp-title { font-size:1.5rem; font-weight:800; color:#fff; margin:0 0 .3rem; letter-spacing:-.025em; }
 .dp-sub   { font-size:.825rem; color:rgba(255,255,255,.4); margin:0; }
-.dp-section-title { font-size:.75rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(245,158,11,.55); margin:0 0 .875rem; }
+.dp-section-title { font-size:.75rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(16,185,129,.55); margin:0 0 .875rem; }
   `],
 })
 export class DpHomePage {
