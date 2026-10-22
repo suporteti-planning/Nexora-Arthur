@@ -1,0 +1,62 @@
+<nav class="navbar">
+
+
+  <header class="hm-topbar">
+    <!-- Left: logo + name -->
+    <div class="hm-topbar-brand">
+      <button class="hm-sidebar-toggle" (click)="toggleSidebar()" aria-label="Recolher menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="3" y1="6"  x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+      <div>
+    <img src="assets\images\Planning-Logo-principal-colorida-transparente.png" alt="Planning company logo with multicolor graphics and white text on a black background" class="navbar-logo" />
+  </div>
+
+    <!-- Right: user -->
+    <div class="hm-topbar-right">
+
+      <div class="acct-anchor">
+        <button class="hm-user-btn"
+                (click)="toggleAccountMenu()"
+                [attr.aria-expanded]="accountMenuOpen()"
+                aria-haspopup="true"
+                aria-label="Menu da conta">
+          <div class="hm-avatar" aria-hidden="true">{{ user()?.initials ?? '?' }}</div>
+          <div class="hm-user-info">
+            <span class="hm-user-name">{{ user()?.displayName ?? 'Usuário' }}</span>
+            <span class="hm-user-role">Colaborador</span>
+          </div>
+          <svg class="hm-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+
+        @if (accountMenuOpen()) {
+          <div class="hm-dropdown" role="menu" aria-label="Menu de conta">
+            <div class="hm-dropdown-header">
+              <div class="hm-dropdown-avatar" aria-hidden="true">{{ user()?.initials ?? '?' }}</div>
+              <div class="hm-dropdown-info">
+                <span class="hm-dropdown-name">{{ user()?.displayName }}</span>
+                <span class="hm-dropdown-email">{{ user()?.email }}</span>
+              </div>
+            </div>
+            <div class="hm-dropdown-sep"></div>
+            <button class="hm-dropdown-item hm-dropdown-item--danger" role="menuitem" (click)="logout()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              Sair da conta
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </header>
+
+</nav>

@@ -1,0 +1,145 @@
+<main class="page-container">
+  <header class="page-header">
+    <div class="header-titles">
+      <span class="eyebrow">Microsoft 365</span>
+      <h2>Licenças</h2>
+      <p>Inventário e atribuições consultados diretamente no tenant Microsoft.</p>
+    </div>
+    <button class="refresh-button" type="button" (click)="loadInventory()" [disabled]="loading" title="Consultar Microsoft Graph">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 7v5h-5M4 17v-5h5"></path>
+        <path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2"></path>
+      </svg>
+      <span>Atualizar</span>
+    </button>
+  </header>
+
+  <section class="summary-grid" aria-label="Resumo de licenças">
+    <article class="summary-card">
+      <span class="summary-icon used-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 11 2 2 4-4"></path></svg>
+      </span>
+      <div><span class="summary-label">Licenças em uso</span><strong>{{ totalUsed }}</strong></div>
+    </article>
+    <article class="summary-card">
+      <span class="summary-icon available-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v8M8 12h8"></path></svg>
+      </span>
+      <div><span class="summary-label">Licenças disponíveis</span><strong>{{ totalAvailable }}</strong></div>
+    </article>
+    <article class="summary-card">
+      <span class="summary-icon catalog-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"></path><path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20"></path></svg>
+      </span>
+      <div><span class="summary-label">SKUs contratados</span><strong>{{ licenses.length }}</strong></div>
+    </article>
+  </section>
+
+  @if (errorMessage) { <div class="notice error-notice" role="alert">{{ errorMessage }}</div> }
+
+  <section class="license-section">
+    <div class="section-heading">
+      <div>
+        <h3>Catálogo de licenças</h3>
+        <p>Consumo e disponibilidade informados pelo tenant Microsoft.</p>
+      </div>
+      <label class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+        <input type="search" placeholder="Buscar licença..." aria-label="Buscar licença" [(ngModel)]="searchTerm">
+      </label>
+    </div>
+
+    @if (loading) {
+      <div class="state-card">Consultando usuários e licenças do tenant...</div>
+    } @else if (!errorMessage) {
+      <div class="license-grid">
+        @for (license of filteredLicenses; track license.skuId) {
+          <article class="license-card">
+            <div class="license-card-heading">
+              <span class="license-mark" aria-hidden="true">M</span>
+              <span class="license-family">MICROSOFT · {{ license.capabilityStatus }}</span>
+            </div>
+            <h4>{{ license.displayName }}</h4>
+            <p class="sku-code">{{ license.skuPartNumber }}</p>
+            <div class="license-numbers">
+              <div><strong>{{ usedCount(license) }}</strong><span>Em uso</span></div>
+              <div><strong [class.no-seats]="availableCount(license) === 0">{{ availableCount(license) }}</strong><span>Disponíveis</span></div>
+            </div>
+            <div class="capacity-row"><label>Total habilitado</label><strong>{{ capacity(license) }}</strong></div>
+            <div class="usage-track" role="progressbar" [attr.aria-valuenow]="usedCount(license)" [attr.aria-valuemin]="0" [attr.aria-valuemax]="capacity(license) || 1" [attr.aria-label]="'Uso de ' + license.displayName">
+              <span [style.width.%]="capacity(license) ? (usedCount(license) / capacity(license) * 100) : (usedCount(license) ? 100 : 0)"></span>
+            </div>
+            <div class="license-actions">
+              <button class="btn-primary" type="button" (click)="openLicenseUsers(license, 'assign')" [disabled]="availableCount(license) === 0 || license.capabilityStatus.toLowerCase() !== 'enabled'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M16 11h6"></path></svg>Atribuir
+              </button>
+              <button class="btn-revoke" type="button" (click)="openLicenseUsers(license, 'revoke')" [disabled]="assignedUsers(license) === 0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M16 11h6"></path></svg>Revogar
+              </button>
+              <button class="btn-list" type="button" (click)="openLicenseUsers(license, 'list')" [attr.aria-label]="'Listar usuários de ' + license.displayName" title="Listar usuários">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 6h13M8 12h13M8 18h13"></path><path d="M3 6h.01M3 12h.01M3 18h.01"></path></svg>Usuários<span>{{ assignedUsers(license) }}</span>
+              </button>
+            </div>
+          </article>
+        } @empty {
+          <div class="state-card">Nenhuma licença encontrada para “{{ searchTerm }}”.</div>
+        }
+      </div>
+      @if (inventory?.synchronizedAt) {
+        <p class="capacity-note">Consulta ao Graph: {{ inventory?.synchronizedAt | date:'dd/MM/yyyy HH:mm:ss' }}. Ações alteram licenças no Microsoft 365.</p>
+      }
+    }
+  </section>
+</main>
+
+@if (selectedLicense) {
+  <div class="modal-backdrop" (click)="closeLicenseUsers()">
+    <section class="license-modal" role="dialog" aria-modal="true" [attr.aria-label]="(action === 'assign' ? 'Atribuir ' : action === 'revoke' ? 'Revogar ' : 'Usuários de ') + selectedLicense.displayName" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div>
+          <span class="eyebrow">{{ action === 'assign' ? 'NOVA ATRIBUIÇÃO' : action === 'revoke' ? 'REVOGAÇÃO DE ACESSO' : 'USUÁRIOS ATRIBUÍDOS' }}</span>
+          <h3>{{ action === 'assign' ? 'Atribuir licença' : action === 'revoke' ? 'Revogar licença' : 'Usuários da licença' }}</h3>
+          <p>{{ selectedLicense.displayName }}</p>
+        </div>
+        <button class="close-button" type="button" aria-label="Fechar" (click)="closeLicenseUsers()"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m5 5 10 10M15 5 5 15"></path></svg></button>
+      </header>
+      <div class="modal-summary">
+        @if (action === 'assign') {
+          <span><strong>{{ availableCount(selectedLicense) }}</strong> licença(s) disponível(is)</span><span>Selecione usuários ativos do tenant</span>
+        } @else if (action === 'revoke') {
+          <span><strong>{{ assignedUserCount }}</strong> usuário(s) com esta licença</span><span>Licenças herdadas de grupo não podem ser removidas individualmente</span>
+        } @else {
+          <span><strong>{{ assignedUserCount }}</strong> usuário(s) atribuídos</span><span>Inclui atribuições diretas e herdadas por grupo</span>
+        }
+      </div>
+      <label class="search-box modal-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+        <input type="search" placeholder="Buscar por nome ou e-mail..." aria-label="Buscar usuários Microsoft" [(ngModel)]="userSearch">
+      </label>
+      <div class="employee-selection">
+        @for (user of eligibleUsers; track user.id) {
+          <div class="employee-option" [class.readonly-option]="action === 'list'">
+            @if (action !== 'list') { <input type="checkbox" [checked]="isSelected(user)" (change)="toggleUser(user)"> }
+            <span class="employee-avatar">{{ user.displayName.slice(0, 1).toUpperCase() }}</span>
+            <span class="employee-details"><strong>{{ user.displayName }}</strong><small>{{ user.email }} · {{ action === 'list' ? assignmentDescription(user) : (user.active ? 'Conta ativa' : 'Conta desativada') }}</small></span>
+            <span class="employee-status">{{ user.active ? 'Ativo' : 'Inativo' }}</span>
+          </div>
+        } @empty {
+          <div class="modal-empty">{{ action === 'assign' ? 'Não há usuários ativos disponíveis para atribuição.' : action === 'revoke' ? 'Nenhuma atribuição direta pode ser revogada aqui. Licenças herdadas devem ser removidas do grupo no Entra.' : 'Nenhum usuário possui esta licença.' }}</div>
+        }
+      </div>
+      @if (modalError) { <p class="modal-error" role="alert">{{ modalError }}</p> }
+      <footer class="modal-footer">
+        <span>{{ action === 'list' ? eligibleUsers.length + ' usuário(s) listado(s)' : selectedUserIds.length + ' selecionado(s)' }}</span>
+        <div>
+          <button class="btn-secondary" type="button" (click)="closeLicenseUsers()" [disabled]="saving">Cancelar</button>
+          @if (action !== 'list') {
+            <button [class]="action === 'assign' ? 'btn-primary' : 'btn-danger'" type="button" (click)="saveLicenseChanges()" [disabled]="saving || selectedUserIds.length === 0">
+              {{ saving ? 'Aplicando no Microsoft 365...' : (action === 'assign' ? 'Atribuir selecionados' : 'Revogar selecionados') }}
+            </button>
+          }
+        </div>
+      </footer>
+    </section>
+  </div>
+}

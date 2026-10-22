@@ -1,0 +1,50 @@
+<main class="home-page">
+	<header class="home-header">
+		<div>
+			<p class="home-eyebrow">Home</p>
+			<h1>Visão geral</h1>
+			<p class="today-label">{{ today }}</p>
+		</div>
+	</header>
+
+	<section class="inventory-strip" aria-label="Equipamentos por status">
+		<div><span>Em uso</span><strong>{{ loading ? '—' : countByStatus('ACTIVE') }}</strong></div>
+		<div><span>Em estoque</span><strong>{{ loading ? '—' : countByStatus('INACTIVE') }}</strong></div>
+		<div><span>Manutenção</span><strong>{{ loading ? '—' : countByStatus('MAINTENANCE') }}</strong></div>
+		<div><span>Backup</span><strong>{{ loading ? '—' : countByStatus('BACKUP') }}</strong></div>
+		<div><span>Em coleta</span><strong>{{ loading ? '—' : countByStatus('REVERSE') }}</strong></div>
+	</section>
+
+	<section class="attention-section" aria-labelledby="attention-title">
+		<div class="section-heading">
+			<div>
+				<p class="section-kicker">FILA OPERACIONAL <span *ngIf="!loading">/ {{ attentionNotebooks.length }}</span></p>
+				<h2 id="attention-title">Equipamentos que precisam de atenção</h2>
+			</div>
+		</div>
+
+		<p class="load-message" *ngIf="loading">Carregando dados do inventário...</p>
+		<div class="load-error" *ngIf="!loading && errorMessage" role="alert">
+			<span>{{ errorMessage }}</span>
+			<button type="button" (click)="loadOverview()">Tentar novamente</button>
+		</div>
+
+		<div class="attention-list" *ngIf="!loading && !errorMessage && attentionNotebooks.length">
+			<div class="attention-columns" aria-hidden="true"><span>Equipamento</span><span>Responsável</span><span>Status</span></div>
+			<article class="attention-row" *ngFor="let notebook of attentionNotebooks">
+				<span class="status-marker" [class]="'status-marker ' + getStatusClass(notebook)" aria-hidden="true"></span>
+				<div class="asset-main">
+					<strong>{{ notebook.name || 'Notebook sem nome' }}</strong>
+					<span>{{ getNotebookDescription(notebook) }}<ng-container *ngIf="notebook.serialNumber"> · {{ notebook.serialNumber }}</ng-container></span>
+				</div>
+				<span class="asset-owner">{{ notebook.employee?.name || 'Sem responsável' }}</span>
+				<span class="status-label" [class]="'status-label ' + getStatusClass(notebook)">{{ getStatusLabel(notebook) }}</span>
+			</article>
+		</div>
+
+		<div class="clear-state" *ngIf="!loading && !errorMessage && !attentionNotebooks.length">
+			<span class="clear-mark" aria-hidden="true">✓</span>
+			<p><strong>Tudo em ordem.</strong> Nenhum equipamento requer atenção agora.</p>
+		</div>
+	</section>
+</main>

@@ -1,0 +1,77 @@
+<div class="home-container">
+  <div class="home-header">
+    <h1>Bem-vindo ao Portal</h1>
+    @if (isExternalUser()) {
+      <p>Acesse os departamentos disponíveis para abrir solicitações.</p>
+    } @else {
+      <p>Selecione um departamento para acessar o painel interno ou abrir uma solicitação.</p>
+    }
+  </div>
+
+  @if (isExternalUser()) {
+    <!-- Usuário externo: apenas botão para portal -->
+    <div class="portal-cta">
+      <div class="portal-cta-card">
+        <div class="portal-cta-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </div>
+        <div class="portal-cta-text">
+          <h2>Acessar Departamentos</h2>
+          <p>Veja os departamentos disponíveis e abra chamados conforme necessário.</p>
+        </div>
+        <button class="btn-portal" (click)="goToPortal()">
+          Abrir Portal
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  } @else {
+    <!-- Usuário interno: cards departamentais -->
+    <div class="dept-grid">
+      @for (dept of departments; track dept.id) {
+        <article class="dept-card">
+          <div class="dept-icon-wrapper">
+            <div class="dept-icon-bg" [style.background]="'linear-gradient(135deg, ' + dept.color + '15 0%, ' + dept.color + '08 100%)'">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" 
+                   class="dept-icon-svg" [style.color]="dept.color">
+                <path [attr.d]="dept.icon"/>
+              </svg>
+            </div>
+          </div>
+          
+          <div class="dept-info">
+            <h2>{{ dept.name }}</h2>
+            <p>{{ dept.desc }}</p>
+          </div>
+
+          <div class="dept-action">
+            @if (hasAccess(dept.id)) {
+              <button class="btn-access" (click)="accessDept(dept.id, dept.route)">
+                Acessar Painel
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            } @else {
+              <button class="btn-visit" (click)="accessDept(dept.id, dept.route)">
+                Abrir Chamado
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>
+
+@if (showTicketModal()) {
+  <app-open-ticket-modal
+    [initialDept]="selectedDeptForTicket()"
+    (closed)="closeModal()"
+    (created)="onTicketCreated()"
+  ></app-open-ticket-modal>
+}

@@ -1,0 +1,149 @@
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+	<section class="modal-container" role="dialog" aria-modal="true" aria-labelledby="notebook-modal-title">
+		<header class="modal-header">
+			<div>
+				<span class="eyebrow">Detalhes do equipamento</span>
+				<h2 id="notebook-modal-title">{{ notebook?.name || 'Notebook' }}</h2>
+			</div>
+			<button class="close-btn" type="button" aria-label="Fechar" (click)="close()">&#10005;</button>
+		</header>
+
+		<div class="modal-body">
+			<div class="status-summary">
+				<span class="summary-label">Status atual</span>
+				<span class="status-badge" [class.active]="formData.status === 'ACTIVE'" [class.inactive]="formData.status === 'INACTIVE'" [class.maintenance]="formData.status === 'MAINTENANCE'" [class.backup]="formData.status === 'BACKUP'" [class.reverse]="formData.status === 'REVERSE'">
+					{{ getStatusLabel(formData.status) }}
+				</span>
+			</div>
+
+			<div class="form-grid">
+				<label class="form-group">Nome *<input name="name" [(ngModel)]="formData.name"></label>
+				<label class="form-group">Marca *<input name="brand" [(ngModel)]="formData.brand"></label>
+				<label class="form-group">Modelo *<input name="model" [(ngModel)]="formData.model"></label>
+				<label class="form-group">Número de série *<input name="serialNumber" [(ngModel)]="formData.serialNumber"></label>
+				<label class="form-group">Processador *<input name="processor" [(ngModel)]="formData.processor"></label>
+				<label class="form-group">Memória RAM *<input name="ram" [(ngModel)]="formData.ram"></label>
+				<label class="form-group">Armazenamento *<input name="storage" [(ngModel)]="formData.storage"></label>
+				<label class="form-group">Preço *<span class="price-input"><span class="currency-prefix">R$</span><input name="price" type="number" min="0" step="0.01" [(ngModel)]="formData.price"></span></label>
+				<label class="form-group">Sistema operacional<input name="operatingSystem" [(ngModel)]="formData.operatingSystem"></label>
+				<label class="form-group">Status *
+					<select name="status" [(ngModel)]="formData.status" (change)="onStatusChange()">
+						<option value="ACTIVE">Ativo</option>
+						<option value="INACTIVE">Inativo</option>
+						<option value="MAINTENANCE">Em Manutenção</option>
+						<option value="BACKUP">Backup</option>
+						<option value="REVERSE">Em coleta</option>
+					</select>
+				</label>
+				<label class="form-group">Centro de custo *
+					<select name="costCenter" [(ngModel)]="formData.costCenter">
+						<option value="" disabled>Selecione uma opção</option>
+						@for (costCenter of costCenters; track costCenter.value) {
+							<option [value]="costCenter.value">{{ costCenter.label }}</option>
+						}
+					</select>
+				</label>
+				<label class="form-group full-width employee-field">Colaborador vinculado
+					<div class="employee-search-wrapper" (click)="$event.stopPropagation()">
+						<input
+							name="employeeSearch"
+							autocomplete="off"
+							placeholder="Buscar por nome, e-mail ou cargo..."
+							[(ngModel)]="employeeSearch"
+							(input)="onEmployeeSearchChange($any($event.target).value)"
+							(focus)="showEmployeeOptions = true"
+							[disabled]="isLoadingEmployees"
+						/>
+						<button class="clear-employee" type="button" aria-label="Remover vínculo" (click)="clearEmployee()" [disabled]="!selectedEmployeeId">&#10005;</button>
+						@if (showEmployeeOptions && !isLoadingEmployees) {
+							<div class="employee-options">
+								@for (employee of filteredEmployees; track employee.id) {
+									<button class="employee-option" type="button" (click)="selectEmployee(employee)">
+										<strong>{{ employee.name }}</strong>
+										<span>{{ employee.email }}{{ employee.position ? ' - ' + employee.position : '' }}</span>
+									</button>
+								} @empty {
+									<span class="no-results">Nenhum colaborador encontrado.</span>
+								}
+							</div>
+						}
+					</div>
+					@if (isLoadingEmployees) { <small>Carregando colaboradores...</small> }
+				</label>
+				<label class="form-group full-width">Observações<textarea name="observations" rows="3" [(ngModel)]="formData.observations"></textarea></label>
+			</div>
+
+			<section class="timeline-section" aria-labelledby="timeline-title">
+				<div class="section-heading">
+					<div>
+						<span class="eyebrow">Auditoria</span>
+						<h3 id="timeline-title">Linha do tempo</h3>
+					</div>
+					<span class="event-count">{{ timeline.length }} {{ timeline.length === 1 ? 'evento' : 'eventos' }}</span>
+				</div>
+
+				@if (isLoadingTimeline) {
+					<p class="timeline-state">Carregando histórico...</p>
+				} @else if (timelineError) {
+					<p class="timeline-state error">{{ timelineError }}</p>
+				} @else if (timeline.length === 0) {
+					<p class="timeline-state">Nenhum evento registrado para este notebook.</p>
+				} @else {
+					<div class="timeline-list">
+						@for (event of timeline; track event.id || event.eventId) {
+							<article class="timeline-event">
+								<span class="timeline-marker" aria-hidden="true"></span>
+								<div class="event-content">
+									<div class="event-meta">
+										<time>{{ formatEventDate(event.createdAt) }}</time>
+										<span>{{ event.createdBy || 'Sistema' }}</span>
+									</div>
+									<p>{{ event.displayText || event.eventType || 'Evento registrado' }}</p>
+								</div>
+							</article>
+						}
+					</div>
+				}
+			</section>
+
+			@if (errorMessage) { <p class="message error">{{ errorMessage }}</p> }
+			@if (successMessage) { <p class="message success">{{ successMessage }}</p> }
+		</div>
+
+		<footer class="modal-footer">
+			<button class="btn-secondary" type="button" (click)="close()">Fechar</button>
+			<button class="btn-primary" type="button" [disabled]="!isFormValid() || isSaving" (click)="save()">
+				{{ isSaving ? 'Salvando...' : 'Salvar alterações' }}
+			</button>
+		</footer>
+
+		@if (statusConfirmationPending) {
+			<div class="confirmation-overlay" (click)="cancelStatusChange()">
+				<section class="confirmation-modal" role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
+					@if (pendingStatus === 'INACTIVE') {
+						<h2>Motivo da inativação</h2>
+						<p>Informe o motivo da inativação deste notebook.</p>
+						<label class="confirmation-field">Motivo *
+							<textarea rows="3" [(ngModel)]="inactivationReason" placeholder="Descreva o motivo da inativação"></textarea>
+						</label>
+					} @else {
+						<h2>Confirmar alteração?</h2>
+					}
+					@if (pendingStatus === 'MAINTENANCE') {
+						<label class="confirmation-field">Defeito *
+							<textarea rows="3" [(ngModel)]="maintenanceDefect" placeholder="Descreva o defeito"></textarea>
+						</label>
+						<label class="confirmation-field">Solução
+							<textarea rows="3" [(ngModel)]="maintenanceSolution" placeholder="Descreva a solução, se houver"></textarea>
+						</label>
+					}
+					@if (statusConfirmationError) { <p class="confirmation-error">{{ statusConfirmationError }}</p> }
+					<div class="confirmation-actions">
+						<button type="button" class="btn-secondary" (click)="cancelStatusChange()">Cancelar</button>
+						<button type="button" class="btn-danger" (click)="confirmStatusChange()">Confirmar alteração</button>
+					</div>
+				</section>
+			</div>
+		}
+	</section>
+</div>

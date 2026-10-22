@@ -1,0 +1,52 @@
+/* Meus Chamados - Layout limpo e focado */
+.meus-chamados-container {
+  min-height: 100vh;
+  background: #0B0F0D;
+  color: #e8f5e9;
+}
+
+.meus-chamados-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+/* Cabeçalho */
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.page-breadcrumb {
+  margin-bottom: 0.25rem;
+}
+
+.breadcrumb-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(0, 255, 102, 0.7);
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+}
+
+.page-subtitle {
+  font-size: 0.95rem;
+  color: rgba(232, 245, 233, 0.65);
+  margin: 0;
+}
+
+.ticket-panel-wrapper {
+  margin-top: 1.5rem;
+}

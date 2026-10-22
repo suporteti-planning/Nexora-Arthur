@@ -1,0 +1,28 @@
+<!-- PÁGINA MEUS CHAMADOS - Layout limpo para todos os usuários -->
+<div class="meus-chamados-container">
+  <div class="meus-chamados-content">
+
+    <!-- Cabeçalho da Página -->
+    <header class="page-header">
+      <div class="page-header-content">
+        <div class="page-breadcrumb">
+          <span class="breadcrumb-label">SOLICITAÇÕES</span>
+        </div>
+        <h1 class="page-title">Meus Chamados</h1>
+        <p class="page-subtitle">Monitore o progresso de todas as solicitações que você enviou aos departamentos.</p>
+      </div>
+    </header>
+
+    <!-- Painel de Tickets -->
+    <div class="ticket-panel-wrapper">
+      <app-ticket-panel
+        mode="mine"
+        variant="default"
+        accentColor="#0ae18c"
+        panelTitle="Meus Chamados"
+        panelSub="Todas as solicitações abertas por você"
+      ></app-ticket-panel>
+    </div>
+
+  </div>
+</div>

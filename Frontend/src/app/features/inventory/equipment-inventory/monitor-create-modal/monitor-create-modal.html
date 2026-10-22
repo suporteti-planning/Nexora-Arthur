@@ -1,0 +1,64 @@
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+  <form class="modal-container" (ngSubmit)="createMonitor()">
+    <div class="modal-header">
+      <div><span class="eyebrow">Inventário de TI</span><h2>Cadastrar monitor</h2></div>
+      <button class="close-btn" type="button" aria-label="Fechar" (click)="close()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <p class="step-description">Informe os dados do novo monitor.</p>
+      <div class="form-grid">
+        <label class="form-group">Nome-Patrimônio *<input name="name" [(ngModel)]="formData.name" placeholder="Ex.: MON-123"></label>
+        <label class="form-group">Marca *<input name="brand" [(ngModel)]="formData.brand" placeholder="Ex.: Dell"></label>
+        <label class="form-group">Modelo *<input name="model" [(ngModel)]="formData.model" placeholder="Ex.: P2422H"></label>
+        <label class="form-group">Número de série *<input name="serialNumber" [(ngModel)]="formData.serialNumber"></label>
+        <label class="form-group">Preço<span class="price-input"><span class="currency-prefix">R$</span><input name="price" type="number" min="0" step="0.01" [(ngModel)]="formData.price" placeholder="0,00"></span></label>
+        <label class="form-group">Status *
+          <select name="status" [(ngModel)]="formData.status">
+            <option value="ACTIVE">Ativo</option>
+            <option value="INACTIVE">Inativo</option>
+            <option value="MAINTENANCE">Em Manutenção</option>
+            <option value="REVERSE">Em coleta</option>
+          </select>
+        </label>
+        <label class="form-group">Centro de custo *
+          <select name="costCenter" [(ngModel)]="formData.costCenter">
+            <option value="" disabled>Selecione uma opção</option>
+            @for (center of costCenters; track center[0]) { <option [value]="center[0]">{{ center[1] }}</option> }
+          </select>
+        </label>
+        <div class="form-group full-width employee-picker">
+          <label for="monitor-employee-search">Colaborador vinculado</label>
+          <div class="employee-search">
+            <input id="monitor-employee-search" name="employeeSearch" autocomplete="off"
+              placeholder="Buscar por nome, e-mail ou cargo..."
+              [ngModel]="employeeSearch" (ngModelChange)="onEmployeeSearch($event)" />
+            <button type="button" class="btn-secondary" (click)="clearEmployee()" [disabled]="!formData.employeeId">Remover</button>
+          </div>
+          @if (formData.employee) {
+            <small>Vinculado a {{ formData.employee.name }} ({{ formData.employee.email }})</small>
+          } @else {
+            <small>Opcional. Digite pelo menos 2 caracteres para pesquisar.</small>
+          }
+          @if (searchingEmployees) { <small>Pesquisando colaboradores...</small> }
+          @if (employeeSearchError) { <small class="form-error" role="alert">{{ employeeSearchError }}</small> }
+          @if (employees.length) {
+            <div class="employee-results">
+              @for (employee of employees; track employee.id) {
+                <button type="button" class="employee-result" (click)="selectEmployee(employee)">
+                  <strong>{{ employee.name }}</strong>
+                  <span>{{ employee.email }}{{ employee.position ? ' · ' + employee.position : '' }}</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+        <label class="form-group full-width">Observações<textarea name="observations" [(ngModel)]="formData.observations" rows="3"></textarea></label>
+      </div>
+      @if (errorMessage) { <p class="form-error" role="alert">{{ errorMessage }}</p> }
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" type="button" (click)="close()">Cancelar</button>
+      <button class="btn-primary" type="submit" [disabled]="!isFormValid() || isSubmitting">{{ isSubmitting ? 'Cadastrando...' : 'Cadastrar monitor' }}</button>
+    </div>
+  </form>
+</div>

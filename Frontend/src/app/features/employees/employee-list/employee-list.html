@@ -1,0 +1,177 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-titles">
+      <span class="eyebrow">Contas</span>
+      <h2>Colaboradores</h2>
+    </div>
+
+    <button class="btn-primary" (click)="openCreateModal()">
+      <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span>Adicionar novo colaborador</span>
+    </button>
+  </div>
+
+  <section class="card table-card">
+    <div class="table-actions">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Procure por colaboradores..." 
+          [(ngModel)]="searchTerm" 
+        />
+      </div>
+      <div>
+        <button type="button" class="btn-secondary">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Exportar</span>
+        </button>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Email</th>
+          <th>CPF</th>
+          <th>Cargo</th>
+          <th>Departamento</th>
+          <th>Origem</th>
+          <th>Status</th>
+          <th>Detalhes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngIf="employees.length; else emptyState">
+          <tr *ngFor="let employee of employees">
+            <td>{{ employee.name }}</td>
+            <td>{{ employee.email }}</td>
+            <td>{{ employee.cpf }}</td>
+            <td>{{ employee.position }}</td>
+            <td>{{ employee.department }}</td>
+            <td>{{ employee.costCenter }}</td>
+            <td>
+              <span
+                class="badge status-badge"
+                [class.status-active]="employee.status === 'ACTIVE'"
+                [class.status-inactive]="employee.status === 'INACTIVE'">
+                {{ employee.status === 'ACTIVE' ? 'Ativo' : 'Inativo' }}
+              </span>
+            </td>
+            <td class="action-cell">
+              <div class="details-wrapper">
+                <button
+                  type="button"
+                  class="btn-details"
+                  (click)="toggleDetailsMenu(employee.id ?? '', $event)">
+                  Detalhes
+                  <svg class="chevron-icon" [class.open]="openMenuId === (employee.id ?? '')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+
+                <div class="details-dropdown" *ngIf="openMenuId === (employee.id ?? '')">
+                  <button type="button" class="dropdown-item" (click)="openAbout(employee)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span>Sobre</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="dropdown-item"
+                    [class.danger]="employee.status !== 'INACTIVE'"
+                    [class.success]="employee.status === 'INACTIVE'"
+                    (click)="toggleStatus(employee)">
+                    <ng-container *ngIf="employee.status !== 'INACTIVE'; else activateTemplate">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                      </svg>
+                      <span>Inativar</span>
+                    </ng-container>
+                    <ng-template #activateTemplate>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                      </svg>
+                      <span>Ativar</span>
+                    </ng-template>
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+
+        <ng-template #emptyState>
+          <tr>
+            <td colspan="8" class="empty-state">Sem colaboradores encontrados.</td>
+          </tr>
+        </ng-template>
+      </tbody>
+    </table>
+
+    <div class="table-footer">
+  <span class="pagination-info">
+    Exibindo <strong>{{ employees.length }}</strong> de <strong>{{ totalFilteredCount }}</strong> colaboradores
+  </span>
+
+  <div class="load-actions">
+    @if (employees.length < totalFilteredCount) {
+      <button class="btn-secondary" (click)="loadMore(50)">+ Carregar mais 50</button>
+      <button class="btn-secondary" (click)="loadMore(100)">+ Carregar mais 100</button>
+      <button class="btn-secondary outline" (click)="showAll()">Mostrar Todos</button>
+    }
+
+    @if (pageSize > INITIAL_PAGE_SIZE) {
+      <button class="btn-secondary warning" (click)="reduceSize(50)">- Mostrar menos 50</button>
+      <button class="btn-secondary outline-warning" (click)="resetSize()">Recolher para {{ INITIAL_PAGE_SIZE }}</button>
+    }
+  </div>
+</div>
+  </section>
+</div>
+
+<div class="confirmation-overlay" *ngIf="employeePendingInactivation" (click)="cancelEmployeeInactivation()">
+  <section class="confirmation-modal" role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <h2>Confirmar inativação</h2>
+    <p>Ao inativar este empregado, as seguintes operações serão realizadas:</p>
+    <ul>
+      <li>Bloqueio de entrada da Microsoft</li>
+      <li>Alteração do nome de exibição para Inativo</li>
+      <li>Alteração da foto de perfil</li>
+    </ul>
+    <div class="confirmation-actions">
+      <button type="button" class="btn-secondary" (click)="cancelEmployeeInactivation()">Cancelar</button>
+      <button type="button" class="btn-danger" (click)="confirmEmployeeInactivation()">Inativar empregado</button>
+    </div>
+  </section>
+</div>
+
+<app-employee-about-modal
+  *ngIf="showAboutModal && selectedEmployee"
+  [employee]="selectedEmployee"
+  (closeModal)="closeAboutModal()"
+  (employeeUpdated)="onEmployeeUpdated($event)">
+</app-employee-about-modal>
+
+<app-employee-create-modal
+  *ngIf="showCreateModal"
+  (closeModal)="closeCreateModal()"
+  (employeeCreated)="onEmployeeCreated($event)">
+</app-employee-create-modal>

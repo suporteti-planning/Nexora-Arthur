@@ -1,0 +1,106 @@
+<div class="doc-container">
+  <div class="doc-header">
+    <h1>Atendimento DOC</h1>
+    <p>Gerencie o progresso dos processos documentais</p>
+  </div>
+
+  <div class="doc-layout">
+    <!-- Lista de Chamados -->
+    <aside class="doc-sidebar">
+      <div class="doc-sidebar-header">
+        <h2>Chamados DOC</h2>
+      </div>
+      
+      @if (loading()) {
+        <div class="doc-loading">
+          <span>Carregando chamados...</span>
+        </div>
+      } @else if (tickets().length === 0) {
+        <div class="doc-empty">
+          <p>Nenhum chamado DOC encontrado</p>
+        </div>
+      } @else {
+        <ul class="doc-list">
+          @for (ticket of tickets(); track ticket.id) {
+            <li class="doc-list-item"
+                [class.doc-list-item--active]="selectedTicket()?.id === ticket.id"
+                (click)="selectTicket(ticket)">
+              <div class="doc-list-item-title">{{ ticket.title }}</div>
+              <div class="doc-list-item-meta">
+                {{ ticket.number }} • {{ ticket.requester?.fullName }}
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </aside>
+
+    <!-- Detalhe e Etapas -->
+    <main class="doc-main">
+      @if (!selectedTicket()) {
+        <div class="doc-empty-state">
+          <p>Selecione um chamado para visualizar as etapas</p>
+        </div>
+      } @else {
+        <div class="doc-detail">
+          <div class="doc-detail-header">
+            <h2>{{ selectedTicket()!.title }}</h2>
+            <p class="doc-detail-meta">
+              {{ selectedTicket()!.number }} • 
+              {{ selectedTicket()!.requester?.fullName }} • 
+              Empresa: {{ selectedTicket()!.extraData?.companyName || '—' }}
+            </p>
+          </div>
+
+          @if (selectedTicket()!.description) {
+            <div class="doc-description">
+              <strong>Descrição:</strong>
+              <p>{{ selectedTicket()!.description }}</p>
+            </div>
+          }
+
+          <!-- Etapas do Processo -->
+          @if (stepsForProcess().length > 0) {
+            <div class="doc-steps-section">
+              <h3>Etapas do Processo</h3>
+              <div class="doc-steps-list">
+                @for (step of stepsForProcess(); track step.id) {
+                  <div class="doc-step-item">
+                    <div class="doc-step-header">
+                      <div class="doc-step-name">{{ step.name }}</div>
+                      <div class="doc-step-controls">
+                        <label class="doc-step-radio">
+                          <input type="radio" name="step-{{ step.id }}"
+                                 [checked]="stepsStatus()[step.id] === 'pending'"
+                                 (change)="toggleStepStatus(step.id, 'pending')" />
+                          <span>Pendente</span>
+                        </label>
+                        <label class="doc-step-radio">
+                          <input type="radio" name="step-{{ step.id }}"
+                                 [checked]="stepsStatus()[step.id] === 'in_progress'"
+                                 (change)="toggleStepStatus(step.id, 'in_progress')" />
+                          <span>Em Andamento</span>
+                        </label>
+                        <label class="doc-step-radio">
+                          <input type="radio" name="step-{{ step.id }}"
+                                 [checked]="stepsStatus()[step.id] === 'completed'"
+                                 (change)="toggleStepStatus(step.id, 'completed')" />
+                          <span>Concluído</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+              <button class="doc-btn-save" (click)="saveProgress()">
+                Salvar Progresso
+              </button>
+            </div>
+          } @else {
+            <p class="doc-no-steps">Nenhuma etapa configurada para este processo</p>
+          }
+        </div>
+      }
+    </main>
+  </div>
+</div>

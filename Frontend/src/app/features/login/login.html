@@ -1,0 +1,108 @@
+<div class="login-root">
+
+
+  <!-- ══ LOGIN SHELL — visível após a intro ══════════════════════════════════ -->
+  <div
+    class="login-shell"
+    [class.login-shell--hidden]="showIntro()"
+    #loginShell
+  >
+
+
+
+    <!-- ── RIGHT PANEL ─────────────────────────────────────────────────── -->
+    <main class="right-panel">
+      <div class="form-card" #formCard>
+
+        <!-- Logo mobile -->
+        <div class="form-logo-mobile" #logoRef>
+          <img
+            src="assets/images/Planning-Logo-principal-colorida-transparente.png"
+            alt="Planning"
+            class="form-logo-mobile-img"
+            width="200" height="48"
+          />
+        </div>
+
+        <!-- ── LOGIN ──────────────────────────────────────────────────── -->
+        @if (isLogin()) {
+          <div class="form-header">
+            <h2 class="form-title">ACESSE SUA INTRANET</h2>
+            <p class="form-subtitle">Entre com suas credenciais para continuar</p>
+          </div>
+
+          <form class="auth-form" (ngSubmit)="onLogin()" novalidate autocomplete="on">
+            <div class="login-field field-group">
+              <label class="field-label" for="username">Usuário ou e-mail</label>
+              <input
+                id="username" type="text" class="field-input"
+                [(ngModel)]="username" name="username"
+                placeholder="seu.usuario" autocomplete="username"
+                [class.field-error]="errorMsg && !username.trim()"
+              />
+            </div>
+
+            <div class="login-field field-group">
+              <label class="field-label" for="password">Senha</label>
+              <div class="password-wrapper">
+                <input
+                  id="password" [type]="showPassword ? 'text' : 'password'"
+                  class="field-input password-input"
+                  [(ngModel)]="password" name="password"
+                  placeholder="••••••••" autocomplete="current-password"
+                  [class.field-error]="errorMsg && !password"
+                />
+                <button type="button" class="password-toggle"
+                  (click)="togglePassword()"
+                  [attr.aria-label]="showPassword ? 'Ocultar senha' : 'Mostrar senha'">
+                  @if (showPassword) {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  }
+                </button>
+              </div>
+            </div>
+
+            @if (errorMsg) {
+              <div class="login-field alert alert-error" role="alert">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="alert-icon">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>{{ errorMsg }}</span>
+              </div>
+            }
+
+            <div class="login-field">
+              <button type="submit" class="btn-primary" [disabled]="loading">
+                @if (loading) {
+                  <span class="btn-spinner" aria-hidden="true"></span>
+                  <span>Entrando…</span>
+                } @else {
+                  <span>ENTRAR</span>
+                }
+              </button>
+            </div>
+
+            <div class="login-field form-footer">
+              <span class="footer-text">Ainda não tem acesso? Acione a TI ou fale com seu gestor</span>
+
+            </div>
+          </form>
+        }
+
+        
+
+      </div>
+    </main>
+  </div><!-- /login-shell -->
+
+</div><!-- /login-root -->

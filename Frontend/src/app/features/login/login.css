@@ -1,0 +1,419 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOGIN PAGE — padrão visual alinhado ao app
+   Paleta: #101114 base | #0ae18c verde | #282a2d / #25282a bordas
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Root wrapper ─────────────────────────────────────────────────────────── */
+.login-root {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  background: radial-gradient(ellipse at 98% 0%, rgba(10, 225, 140, .055), transparent 34%), #101114;
+  overflow: hidden;
+  color: #f1f3f2;
+}
+
+/* ── Shell ────────────────────────────────────────────────────────────────── */
+.login-shell {
+  position: relative;
+  display: flex;
+  min-height: 100dvh;
+  background: transparent;
+  overflow: hidden;
+  transition: opacity .4s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEFT PANEL
+   ═══════════════════════════════════════════════════════════════════════════ */
+.left-panel {
+  position: relative;
+  z-index: 1;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 3.5rem;
+  flex: 0 0 50%;
+}
+
+@media (min-width: 900px) {
+  .left-panel { display: flex; }
+}
+
+.left-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 480px;
+}
+
+/* Badge */
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  background: rgba(10, 225, 140, .06);
+  border: 1px solid rgba(10, 225, 140, .23);
+  border-radius: 4px;
+  padding: .3rem .85rem;
+  font-size: .65rem;
+  font-weight: 700;
+  color: #0ae18c;
+  width: fit-content;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.badge-dot {
+  width: 5px;
+  height: 5px;
+  background: #0ae18c;
+  border-radius: 9999px;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .35; }
+}
+
+/* Headline — Bebas Neue condensada */
+.brand-headline {
+  font-family: 'Bebas Neue', 'Arial Narrow', Arial, sans-serif;
+  font-size: clamp(4rem, 7.5vw, 6.5rem);
+  font-weight: 400;
+  line-height: .95;
+  color: #f5f7f6;
+  margin: 0;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.headline-accent {
+  color: #0ae18c;
+}
+
+/* Logo da Planning */
+.brand-logo-wrap {
+  display: flex;
+  align-items: center;
+  margin-top: .25rem;
+}
+
+.brand-logo-img {
+  height: 80px;
+  width: auto;
+  max-width: 340px;
+  filter: brightness(1.08);
+}
+
+/* Subtítulo */
+.brand-sub {
+  font-size: .875rem;
+  color: #a5ada8;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* Features */
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: .875rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: .875rem;
+  font-size: .85rem;
+  color: #858d88;
+}
+
+.feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(10, 225, 140, .06);
+  border: 1px solid rgba(10, 225, 140, .23);
+  color: #0ae18c;
+  flex-shrink: 0;
+}
+
+.feature-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RIGHT PANEL
+   ═══════════════════════════════════════════════════════════════════════════ */
+.right-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 2rem 1.5rem;
+}
+
+/* ── Form card ─────────────────────────────────────────────────────────────── */
+.form-card {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: #16171a;
+  border: 1px solid #282a2d;
+  border-radius: 6px;
+  padding: 2rem 1.875rem 1.625rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
+}
+
+/* Mobile logo */
+.form-logo-mobile {
+  display: flex;
+  justify-content: center;
+}
+
+.form-logo-mobile-img {
+  height: 36px;
+  width: auto;
+}
+
+@media (min-width: 900px) {
+  .form-logo-mobile { display: none; }
+}
+
+/* Form header */
+.form-header {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+}
+
+.form-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #f5f7f6;
+  margin: 0;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+.form-subtitle {
+  font-size: .82rem;
+  color: #858d88;
+  margin: 0;
+}
+
+/* ── Auth form ─────────────────────────────────────────────────────────────── */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+
+.field-label {
+  font-size: .8rem;
+  font-weight: 500;
+  color: #a5ada8;
+  letter-spacing: .02em;
+}
+
+.field-input {
+  width: 100%;
+  background: #101114;
+  border: 1px solid #282a2d;
+  border-radius: 4px;
+  padding: .65rem .875rem;
+  font-size: .875rem;
+  color: #edf1ee;
+  outline: none;
+  transition: border-color .2s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.field-input::placeholder {
+  color: #737b76;
+}
+
+.field-input:focus {
+  border-color: #0ae18c;
+}
+
+.field-input.field-error {
+  border-color: rgba(239, 68, 68, .55);
+}
+
+/* Password wrapper */
+.password-wrapper {
+  position: relative;
+}
+
+.password-input {
+  padding-right: 2.75rem;
+}
+
+.password-toggle {
+  position: absolute;
+  right: .75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: .2rem;
+  cursor: pointer;
+  color: #737b76;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .2s;
+  border-radius: 3px;
+}
+
+.password-toggle:hover          { color: #0ae18c; }
+.password-toggle:focus-visible  { outline: 2px solid #0ae18c; outline-offset: 2px; }
+.password-toggle svg            { width: 15px; height: 15px; }
+
+/* ── Primary button ───────────────────────────────────────────────────────── */
+.btn-primary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .72rem 1.5rem;
+  background: #0ae18c;
+  color: #101114;
+  font-size: .85rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  transition: filter .18s;
+  font-family: inherit;
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn-primary:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid #0ae18c;
+  outline-offset: 2px;
+}
+
+/* Spinner */
+.btn-spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(16, 17, 20, .25);
+  border-top-color: #101114;
+  border-radius: 9999px;
+  animation: spin .65s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Alerts ────────────────────────────────────────────────────────────────── */
+.alert {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .65rem .875rem;
+  border-radius: 4px;
+  font-size: .82rem;
+  line-height: 1.4;
+}
+
+.alert-icon { width: 15px; height: 15px; flex-shrink: 0; }
+
+.alert-error {
+  background: rgba(239, 68, 68, .08);
+  border: 1px solid #49312f;
+  color: #e59a91;
+}
+
+.alert-success {
+  background: rgba(10, 225, 140, .06);
+  border: 1px solid rgba(10, 225, 140, .23);
+  color: #0ae18c;
+}
+
+/* ── Form footer ───────────────────────────────────────────────────────────── */
+.form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .375rem;
+  flex-wrap: wrap;
+}
+
+.footer-text {
+  font-size: .8rem;
+  color: #858d88;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: .8rem;
+  font-weight: 600;
+  color: #0ae18c;
+  transition: color .2s;
+}
+
+.link-btn:hover         { color: #11ff77; text-decoration: underline; }
+.link-btn:focus-visible { outline: 2px solid #0ae18c; outline-offset: 2px; border-radius: 2px; }
+
+/* ── Demo notice ───────────────────────────────────────────────────────────── */
+.demo-notice {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: .72rem;
+  color: #737b76;
+  padding: .45rem .7rem;
+  border-radius: 4px;
+  background: #101114;
+  border: 1px dashed #282a2d;
+}
+
+.demo-notice svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  color: #858d88;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .badge-dot,
+  .btn-spinner { animation: none !important; }
+  .btn-primary { transition: none; }
+  .field-input { transition: none; }
+}

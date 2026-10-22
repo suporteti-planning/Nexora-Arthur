@@ -1,0 +1,222 @@
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+.home-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.home-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f5f7f6;
+  margin-bottom: 0.5rem;
+}
+
+.home-header p {
+  color: #858d88;
+  font-size: 1rem;
+}
+
+.dept-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.dept-card {
+  background: #17191c;
+  border: 1px solid #282a2d;
+  border-radius: 12px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.dept-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(10, 225, 140, 0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.dept-card:hover {
+  border-color: rgba(10, 225, 140, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(10, 225, 140, 0.12);
+}
+
+.dept-card:hover::before {
+  opacity: 1;
+}
+
+.dept-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.dept-icon-bg {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(10, 225, 140, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dept-card:hover .dept-icon-bg {
+  transform: scale(1.08);
+  border-color: rgba(10, 225, 140, 0.25);
+}
+
+.dept-icon-svg {
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 2px 8px currentColor);
+}
+
+.dept-info h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e8ecea;
+  margin: 0 0 0.25rem;
+}
+
+.dept-info p {
+  font-size: 0.85rem;
+  color: #858d88;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.dept-action {
+  margin-top: auto;
+}
+
+.btn-access, .btn-visit {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-access {
+  background: rgba(10, 225, 140, 0.1);
+  color: #0ae18c;
+  border: 1px solid rgba(10, 225, 140, 0.3);
+}
+.btn-access:hover { background: rgba(10, 225, 140, 0.2); }
+
+.btn-visit {
+  background: transparent;
+  color: #a5ada8;
+  border: 1px solid #282a2d;
+}
+.btn-visit:hover { background: #1a1b1e; color: #f5f7f6; border-color: #3a3d40; }
+
+.btn-access svg, .btn-visit svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Portal CTA for external users */
+.portal-cta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.portal-cta-card {
+  background: linear-gradient(135deg, #17191c 0%, #1d1f22 100%);
+  border: 2px solid rgba(10, 225, 140, 0.2);
+  border-radius: 12px;
+  padding: 3rem 2.5rem;
+  max-width: 500px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.portal-cta-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: rgba(10, 225, 140, 0.1);
+  color: #0ae18c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portal-cta-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.portal-cta-text h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f5f7f6;
+  margin: 0 0 0.5rem;
+}
+
+.portal-cta-text p {
+  color: #a5ada8;
+  font-size: 0.95rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.btn-portal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 2rem;
+  background: #0ae18c;
+  color: #0a0b0d;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-portal:hover {
+  background: #09c778;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(10, 225, 140, 0.3);
+}
+
+.btn-portal svg {
+  width: 18px;
+  height: 18px;
+}

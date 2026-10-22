@@ -1,0 +1,126 @@
+<aside class="hm-sidebar" [class.hm-sidebar--collapsed]="sidebarCollapsed()" aria-label="Navegação lateral">
+
+      <!-- NAVEGAÇÃO GERAL -->
+<nav class="hm-nav-section" aria-label="Navegação principal">
+  <p class="hm-nav-label">NAVEGAÇÃO</p>
+
+  <!-- Início - TODOS os usuários veem -->
+  <a routerLink="/home" routerLinkActive="hm-nav-item--active"
+     [routerLinkActiveOptions]="{ exact: true }" class="hm-nav-item" aria-label="Início">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+    <span>Início</span>
+  </a>
+
+  <!-- USUÁRIO EXTERNO: Apenas Início e Meus Chamados -->
+  @if (isExternalUser()) {
+    <a routerLink="/meus-chamados" routerLinkActive="hm-nav-item--active"
+       class="hm-nav-item" aria-label="Meus Chamados">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/>
+      </svg>
+      <span>Meus Chamados</span>
+    </a>
+  }
+
+  <!-- USUÁRIOS INTERNOS: Painel Departamental + Meus Chamados -->
+  @if (!isExternalUser()) {
+    @if (userDepartment() !== null && !isGlobal()) {
+      <a [routerLink]="departmentPanelRoute()" routerLinkActive="hm-nav-item--active"
+         class="hm-nav-item" [attr.aria-label]="'Painel ' + departmentPanelName()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <span>Painel {{ departmentPanelName() }}</span>
+      </a>
+    }
+
+    <a routerLink="/meus-chamados" routerLinkActive="hm-nav-item--active"
+       class="hm-nav-item" aria-label="Meus Chamados">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/>
+      </svg>
+      <span>Meus Chamados</span>
+    </a>
+  }
+
+  <!-- TI/Admin: Ferramentas de Backoffice -->
+  @if (isGlobal()) {
+    <a routerLink="/backoffice/employees" routerLinkActive="hm-nav-item--active"
+       class="hm-nav-item" aria-label="Colaboradores">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <span>Colaboradores</span>
+    </a>
+
+    <a routerLink="/backoffice/equipment-inventory" routerLinkActive="hm-nav-item--active"
+       class="hm-nav-item" aria-label="Inventário">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+      </svg>
+      <span>Inventário</span>
+    </a>
+
+    <a routerLink="/backoffice/licenses" routerLinkActive="hm-nav-item--active"
+       class="hm-nav-item" aria-label="Licenças Microsoft">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/>
+        <path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20"/>
+      </svg>
+      <span>Licenças Microsoft</span>
+    </a>
+
+    <a routerLink="/backoffice/password-vault" routerLinkActive="hm-nav-item--active"
+       class="hm-nav-item" aria-label="Cofre de Senhas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="4" y="10" width="16" height="11" rx="2"/>
+        <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+        <circle cx="12" cy="15" r="1"/>
+        <path d="M12 16v2"/>
+      </svg>
+      <span>Cofre de Senhas</span>
+    </a>
+  }
+</nav>
+
+<!-- ADMINISTRAÇÃO (gestão de usuários) -->
+@if (canManageUsers()) {
+  <nav class="hm-nav-section" aria-label="Administração">
+    <p class="hm-nav-label">ADMINISTRAÇÃO</p>
+    <a routerLink="/admin/users" routerLinkActive="hm-nav-item--active"
+       class="hm-nav-item" aria-label="Gestão de Usuários">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <span>Gestão de Usuários</span>
+    </a>
+  </nav>
+}
+
+      <!-- Sidebar footer -->
+      <div class="hm-sidebar-footer">
+        <div class="hm-sidebar-brand-card">
+          <div class="hm-sidebar-brand-logo" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="#00FF66" stroke-width="1.5"/>
+              <circle cx="10" cy="10" r="3" fill="#00FF66" opacity="0.85"/>
+            </svg>
+          </div>
+          <div class="hm-sidebar-brand-text">
+            <span class="hm-sidebar-brand-name">Nexora</span>
+            <span class="hm-sidebar-brand-tagline">Conectando pessoas,<br>processos e resultados.</span>
+          </div>
+        </div>
+      </div>
+    </aside>

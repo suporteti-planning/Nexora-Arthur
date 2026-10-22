@@ -1,0 +1,260 @@
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+  <div class="modal-container">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2>{{ step === 1 ? 'Alocar Notebook' : 'Informações do Colaborador' }}</h2>
+      <button class="close-btn" (click)="close()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="steps-indicator">
+      <div class="step" [class.active]="step === 1" [class.completed]="step > 1">
+        <span class="step-number">1</span>
+        <span class="step-label">Notebook</span>
+      </div>
+      <div class="step-line" [class.completed]="step > 1"></div>
+      <div class="step" [class.active]="step === 2">
+        <span class="step-number">2</span>
+        <span class="step-label">Dados do Colaborador</span>
+      </div>
+    </div>
+
+    <!-- Step 1: Notebook Selection -->
+    @if (step === 1) {
+      <div class="modal-body step-1">
+        <div class="step-content">
+          <p class="step-description">Selecione um notebook disponível para alocar ao novo colaborador.</p>
+          <button class="external-user-btn" type="button" (click)="continueAsExternalUser()">
+            Usuário externo
+          </button>
+          
+          <!-- Filtro de busca -->
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input 
+              type="text" 
+              placeholder="Buscar notebook por nome, modelo ou série..." 
+              [(ngModel)]="notebookSearch"
+              (ngModelChange)="filterNotebooks()"
+            />
+          </div>
+
+          <!-- Lista de Notebooks -->
+          <div class="notebook-list">
+            @if (loading) {
+              <div class="loading-state">
+                <span>Carregando notebooks disponíveis...</span>
+              </div>
+            } @else if (filteredNotebooks.length === 0) {
+              <div class="empty-state">
+                <span>Nenhum notebook disponível no momento.</span>
+              </div>
+            } @else {
+              @for (notebook of filteredNotebooks; track notebook.id) {
+                <div 
+                  class="notebook-item" 
+                  [class.selected]="selectedNotebook?.id === notebook.id"
+                  (click)="selectNotebook(notebook)"
+                >
+                  <div class="notebook-info">
+                    <span class="notebook-name">{{ notebook.name }}</span>
+                    <span class="notebook-details">
+                      {{ notebook.brand }} {{ notebook.model }} • Série: {{ notebook.serialNumber }}
+                    </span>
+                    <span class="notebook-specs">
+                      {{ notebook.processor }} • {{ notebook.ram }} • {{ notebook.storage }}
+                    </span>
+                  </div>
+                  <div class="notebook-status">
+                    <span class="status-badge available">Disponível</span>
+                  </div>
+                  @if (selectedNotebook?.id === notebook.id) {
+                    <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="#0AE18C" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  }
+                </div>
+              }
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Step 2: Employee Form -->
+    @if (step === 2) {
+      <div class="modal-body step-2 slide-in">
+        <div class="step-content">
+          <p class="step-description">Preencha os dados do novo colaborador.</p>
+
+          <!-- Notebook Selecionado -->
+          @if (!isExternalUser) {
+            <div class="selected-notebook-info">
+              <span class="label">Notebook Alocado</span>
+              <span class="value">{{ selectedNotebook?.name }} ({{ selectedNotebook?.brand }} {{ selectedNotebook?.model }})</span>
+              <button class="btn-change" (click)="goToStep(1)">Alterar</button>
+            </div>
+          } @else {
+            <div class="external-user-info">
+              <span class="label">Tipo de usuário</span>
+              <span class="value">Usuário externo, sem notebook vinculado</span>
+            </div>
+          }
+
+          <!-- Formulário -->
+          <div class="form-grid">
+            <!-- Nome -->
+            <div class="form-group">
+              <label>Nome *</label>
+              <input [(ngModel)]="formData.name" placeholder="Primeiro nome" required>
+            </div>
+
+            <!-- Sobrenome -->
+            <div class="form-group">
+              <label>Sobrenome *</label>
+              <input [(ngModel)]="formData.lastName" placeholder="Sobrenome" required>
+            </div>
+
+            <!-- Nome de Exibição -->
+            <div class="form-group full-width">
+              <label>Nome de Exibição *</label>
+              <input [(ngModel)]="formData.displayName" placeholder="Nome que será exibido no Teams" required>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group full-width">
+              <label>E-mail *</label>
+              <input
+                [(ngModel)]="formData.email"
+                type="email"
+                placeholder="email@planning.com.br"
+                required
+                [class.email-invalid]="emailAvailability === 'taken' || emailAvailability === 'invalid'"
+                [class.email-available]="emailAvailability === 'available'"
+                [class.email-checking]="emailAvailability === 'checking'"
+                (ngModelChange)="checkEmailAvailability()"
+              >
+              @if (emailAvailability !== 'unchecked') {
+                <span class="field-status" role="status" aria-live="polite" [class.available]="emailAvailability === 'available'" [class.taken]="emailAvailability === 'taken' || emailAvailability === 'invalid'" [class.checking]="emailAvailability === 'checking'">
+                  {{ emailAvailabilityMessage }}
+                </span>
+              }
+            </div>
+
+            <!-- Senha -->
+            <div class="form-group full-width">
+              <label>Senha *</label>
+              <div class="password-wrapper">
+                <input 
+                  [(ngModel)]="formData.password" 
+                  [type]="showPassword ? 'text' : 'password'" 
+                  placeholder="Senha"
+                  required
+                >
+                <button class="toggle-password" (click)="showPassword = !showPassword" type="button">
+                  {{ showPassword ? '' : '' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- CPF -->
+            <div class="form-group">
+              <label>CPF *</label>
+              <input [(ngModel)]="formData.cpf" placeholder="Ex: 123.456.789-00" required>
+            </div>
+
+            <!-- Cargo -->
+            <div class="form-group">
+              <label>Cargo *</label>
+              <input [(ngModel)]="formData.position" placeholder="Ex: Analista" required>
+            </div>
+
+            <!-- Departamento -->
+            <div class="form-group">
+              <label>Departamento *</label>
+              <input [(ngModel)]="formData.department" placeholder="Ex: Contábil" required>
+            </div>
+
+            <div class="form-group">
+              <label>Líder *</label>
+              <input [(ngModel)]="formData.leader" placeholder="Ex: João Silva" required>
+            </div>
+
+            <!-- Estado/Província -->
+            <div class="form-group">
+              <label>Estado/Província *</label>
+              <select [(ngModel)]="formData.costCenter" required>
+                <option [ngValue]="null" disabled>Selecione uma opção</option>
+                @for (costCenter of availableCostCenters; track costCenter.value) {
+                  <option [value]="costCenter.value">{{ costCenter.label }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Escritório -->
+            <div class="form-group">
+              <label>Escritório</label>
+              <input [(ngModel)]="formData.office" placeholder="Ex: SP - Centro">
+            </div>
+
+            <!-- Licenças Microsoft -->
+            <div class="form-group full-width">
+              <label>Licenças Microsoft *</label>
+              <div class="licenses-grid">
+                @for (license of availableLicenses; track license.value) {
+                  <label class="license-checkbox" [class.unavailable]="license.disabled">
+                    <input 
+                      type="checkbox" 
+                      [value]="license.value"
+                      [checked]="isLicenseSelected(license.value)"
+                      [disabled]="license.disabled"
+                      (change)="toggleLicense(license.value)"
+                    >
+                    <span class="license-name">{{ license.label }}</span>
+                    <span class="license-capacity">{{ license.disabled ? 'Sem saldo' : license.available + ' disponíveis' }}</span>
+                  </label>
+                }
+              </div>
+              @if (selectedLicenses.length === 0) {
+                <span class="field-error">Selecione pelo menos uma licença</span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      @if (step === 1) {
+        <button class="btn-secondary" (click)="close()">Cancelar</button>
+        <button 
+          class="btn-primary" 
+          [disabled]="!selectedNotebook && !isExternalUser"
+          (click)="goToStep(2)"
+        >
+          Próximo →
+        </button>
+      }
+      @if (step === 2) {
+        <button class="btn-secondary" (click)="goToStep(1)">← Voltar</button>
+        <button class="btn-secondary" (click)="close()">Cancelar</button>
+        <button 
+          class="btn-primary" 
+          [disabled]="!isFormValid() || isSubmitting"
+          (click)="createEmployee()"
+        >
+          {{ isSubmitting ? 'Criando...' : 'Criar Colaborador' }}
+        </button>
+      }
+    </div>
+  </div>
+</div>

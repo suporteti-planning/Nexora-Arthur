@@ -1,0 +1,308 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-titles">
+      <span class="eyebrow">Parque de equipamentos</span>
+      <h2>Inventário de Equipamentos</h2>
+    </div>
+    
+      <div class="header-actions">
+      <div class="import-dropdown">
+        <button class="btn-secondary" type="button" (click)="toggleImportMenu($event)">
+          <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Importar</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+
+        @if (showImportMenu) {
+          <div class="import-menu" (click)="$event.stopPropagation()">
+            <button type="button" (click)="openImportModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <div>
+                <strong>Importar planilha</strong>
+                <small>Carregar notebooks em massa via Excel</small>
+              </div>
+            </button>
+
+            <button type="button" (click)="downloadTemplate()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <div>
+                <strong>Exportar planilha modelo</strong>
+                <small>Baixar o arquivo de exemplo</small>
+              </div>
+            </button>
+          </div>
+        }
+      </div>
+    <button class="btn-primary" type="button" (click)="selectedType === 'NOTEBOOK' ? openCreateModal() : openMonitorCreateModal()">
+      <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span>{{ selectedType === 'NOTEBOOK' ? 'Cadastrar Notebook' : 'Cadastrar Monitor' }}</span>
+    </button>
+  </div>
+  </div>
+
+
+
+  <nav class="asset-tabs" aria-label="Tipo de equipamento">
+    <button type="button" [class.selected]="selectedType === 'NOTEBOOK'" (click)="selectType('NOTEBOOK')">Notebooks</button>
+    <button type="button" [class.selected]="selectedType === 'MONITOR'" (click)="selectType('MONITOR')">Monitores</button>
+  </nav>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <span class="kpi-label">Total de Ativos</span>
+      <span class="kpi-value">{{ selectedType === 'NOTEBOOK' ? notebooks.length : monitors.length }}</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Em Uso</span>
+      <span class="kpi-value success">{{ countSelectedStatus('ACTIVE') }}</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Em Estoque</span>
+      <span class="kpi-value info">{{ countSelectedStatus('INACTIVE') }}</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Em Manutenção</span>
+      <span class="kpi-value warning">{{ countSelectedStatus('MAINTENANCE') }}</span>
+    </div>
+    <div class="kpi-card" *ngIf="selectedType === 'NOTEBOOK'">
+      <span class="kpi-label">Backup</span>
+      <span class="kpi-value info">{{ countSelectedStatus('BACKUP') }}</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Em coleta</span>
+      <span class="kpi-value warning">{{ countSelectedStatus('REVERSE') }}</span>
+    </div>
+  </div>
+
+  <section class="card table-card">
+    <div class="table-actions">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Buscar por nome, modelo, série ou responsável..." 
+          [(ngModel)]="searchTerm" 
+          (ngModelChange)="onSearchChange()"
+        />
+      </div>
+
+      <div class="filter-box">
+        <select [(ngModel)]="statusFilter">
+          <option value="">Todos os Status</option>
+          <option value="ACTIVE">Ativo</option>
+          <option value="INACTIVE">Inativo</option>
+          <option value="MAINTENANCE">Em Manutenção</option>
+          <option *ngIf="selectedType === 'NOTEBOOK'" value="BACKUP">Backup</option>
+          <option value="REVERSE">Em coleta</option>
+        </select>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <ng-container *ngIf="selectedType === 'NOTEBOOK'; else monitorHeaders">
+            <th>Notebook</th><th>Número de Série</th><th>Centro de Custo</th><th>Responsável</th><th>Status</th><th></th>
+          </ng-container>
+          <ng-template #monitorHeaders>
+            <th>Monitor</th><th>Número de Série</th><th>Centro de Custo</th><th>Colaborador</th><th>Status</th><th></th>
+          </ng-template>
+        </tr>
+      </thead>
+      <tbody>
+        @if (selectedType === 'NOTEBOOK' && loading) {
+          <tr><td colspan="6" class="empty-state">Carregando notebooks...</td></tr>
+        } @else if (selectedType === 'NOTEBOOK' && errorMessage) {
+          <tr><td colspan="6" class="empty-state error-state">{{ errorMessage }}</td></tr>
+        } @else if (selectedType === 'NOTEBOOK') {
+        @for (item of filteredNotebooks; track item.id) {
+          <tr>
+            <td>
+              <div class="equipment-info">
+                <span class="equipment-name">{{ item.name }}</span>
+                <span class="equipment-sn">{{ item.brand }} {{ item.model }}</span>
+              </div>
+            </td>
+            <td><span class="patrimony-tag">{{ item.serialNumber }}</span></td>
+            <td>{{ getCostCenterLabel(item.costCenter) }}</td>
+            <td>{{ item.employee?.name || 'Disponível' }}</td>
+            <td>
+              <span [class]="'status-badge ' + getStatusClass(item.status)">
+                {{ getStatusLabel(item.status) }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button class="btn-details" type="button" (click)="$event.stopPropagation(); openAboutModal(item)">Detalhes</button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="empty-state">Nenhum equipamento encontrado.</td>
+          </tr>
+        }
+        } @else if (monitorsLoading) {
+          <tr><td colspan="6" class="empty-state">Carregando monitores...</td></tr>
+        } @else if (monitorErrorMessage) {
+          <tr><td colspan="6" class="empty-state error-state">{{ monitorErrorMessage }}</td></tr>
+        } @else {
+          @for (item of filteredMonitors; track item.id) {
+            <tr>
+              <td><div class="equipment-info"><span class="equipment-name">{{ item.name }}</span><span class="equipment-sn">{{ item.brand }} {{ item.model }}</span></div></td>
+              <td><span class="patrimony-tag">{{ item.serialNumber }}</span></td>
+              <td>{{ getCostCenterLabel(item.costCenter) }}</td>
+              <td>{{ item.employee?.name || 'Disponível' }}</td>
+              <td><span [class]="'status-badge ' + getStatusClass(item.status)">{{ getStatusLabel(item.status) }}</span></td>
+              <td class="actions-cell">
+                <button class="btn-details" type="button" (click)="$event.stopPropagation(); openMonitorDetails(item)">Detalhes</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="empty-state">Nenhum monitor encontrado.</td></tr>
+          }
+        }
+      </tbody>
+    </table>
+  </section>
+</div>
+
+@if (showCreateModal) {
+  <app-notebook-create-modal
+    (closeModal)="closeCreateModal()"
+    (notebookCreated)="onNotebookCreated($event)"
+  />
+}
+
+@if (showMonitorCreateModal) {
+  <app-monitor-create-modal
+    (closeModal)="closeMonitorCreateModal()"
+    (monitorCreated)="onMonitorCreated($event)"
+  />
+}
+
+@if (showAboutModal) {
+  <app-notebook-about-modal
+    [notebook]="selectedNotebook"
+    (closeModal)="closeAboutModal()"
+    (notebookUpdated)="onNotebookUpdated($event)"
+  />
+}
+
+@if (showMonitorDetailsModal && selectedMonitor) { 
+  <app-monitor-details-modal
+    [monitor]="selectedMonitor"
+    (closeModal)="closeMonitorDetails()"
+    (monitorUpdated)="onMonitorUpdated($event)"
+  />
+}
+
+@if (showImportModal) {
+  <div class="modal-overlay" (click)="onImportOverlayClick($event)">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div>
+          <span class="eyebrow">Importação em massa</span>
+          <h2>Importar notebooks</h2>
+        </div>
+        <button class="close-btn" type="button" aria-label="Fechar" (click)="closeImportModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="step-description">
+          Selecione a planilha Excel (.xlsx) com os notebooks a serem importados.
+          Os colaboradores serão vinculados automaticamente pelo e-mail.
+        </p>
+
+        <!-- Área de upload -->
+        <label class="upload-area" [class.has-file]="selectedImportFile">
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            (change)="onImportFileSelected($event)"
+            hidden
+          />
+          <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+
+          @if (selectedImportFile) {
+            <span class="upload-title">{{ selectedImportFile.name }}</span>
+            <span class="upload-subtitle">
+              {{ (selectedImportFile.size / 1024).toFixed(1) }} KB · Clique para trocar o arquivo
+            </span>
+          } @else {
+            <span class="upload-title">Clique para selecionar a planilha</span>
+            <span class="upload-subtitle">Formatos aceitos: .xlsx, .xls</span>
+          }
+        </label>
+
+        @if (importError) {
+          <p class="form-error">{{ importError }}</p>
+        }
+
+        @if (importResult) {
+          <div class="import-result" [class.success]="importResult.success" [class.error]="!importResult.success">
+            <h3>{{ importResult.message }}</h3>
+            <div class="import-stats">
+              <span><strong>Total:</strong> {{ importResult.totalRows }}</span>
+              <span class="ok"><strong>Importados:</strong> {{ importResult.imported }}</span>
+              <span class="warn"><strong>Atualizados:</strong> {{ importResult.updated }}</span>
+              @if (importResult.errors > 0) {
+                <span class="err"><strong>Erros:</strong> {{ importResult.errors }}</span>
+              }
+            </div>
+
+            @if (importResult.errorDetails && (importResult.errorDetails | keyvalue)?.length) {
+              <details class="import-errors">
+                <summary>Ver detalhes dos erros</summary>
+                <ul>
+                  @for (entry of importResult.errorDetails | keyvalue; track entry.key) {
+                    <li><strong>{{ entry.key }}:</strong> {{ entry.value }}</li>
+                  }
+                </ul>
+              </details>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" type="button" (click)="closeImportModal()">Cancelar</button>
+        <button
+          class="btn-primary"
+          type="button"
+          [disabled]="!selectedImportFile || isImporting"
+          (click)="submitImport()"
+        >
+          {{ isImporting ? 'Importando...' : 'Importar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
