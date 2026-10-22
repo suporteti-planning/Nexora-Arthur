@@ -17,6 +17,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { SidebarStateService } from '../../../core/services/sidebar-state.service';
 import { Notebook } from '../../../core/models/notebook';
 import { NotebookService } from '../../../core/services/notebook';
 import gsap from 'gsap';
@@ -52,8 +53,10 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly platformId  = inject(PLATFORM_ID);
   private readonly zone        = inject(NgZone);
   private readonly cdr         = inject(ChangeDetectorRef);
+  private readonly sidebarState = inject(SidebarStateService);
 
   readonly user = this.auth.sessionUser;
+  readonly sidebarCollapsed = this.sidebarState.sidebarCollapsed;
 
   // ── Static dept nav items ─────────────────────────────────────────────────
   readonly deptNavItems: { label: string; icon: string; route?: string }[] = [
@@ -69,7 +72,6 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ── UI state ──────────────────────────────────────────────────────────────
   accountMenuOpen  = signal(false);
-  sidebarCollapsed = signal(false);
   searchQuery      = signal('');
   activeSection    = signal<'dashboard' | 'ti'>('dashboard');
 
@@ -199,7 +201,7 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ── UI actions ────────────────────────────────────────────────────────────
   toggleAccountMenu():  void { this.accountMenuOpen.update(v => !v); }
-  toggleSidebar():      void { this.sidebarCollapsed.update(v => !v); }
+  toggleSidebar():      void { this.sidebarState.toggleSidebar(); }
   logout():             void { this.auth.logout(); }
 
   openTicketModal(): void {

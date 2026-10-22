@@ -16,6 +16,7 @@ import {
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { SidebarStateService } from '../../../core/services/sidebar-state.service';
 import { Notebook } from '../../../core/models/notebook';
 import { NotebookService } from '../../../core/services/notebook';
 import gsap from 'gsap';
@@ -50,8 +51,10 @@ export class Sidebar implements OnInit, AfterViewInit, OnDestroy {
   private readonly platformId  = inject(PLATFORM_ID);
   private readonly zone        = inject(NgZone);
   private readonly cdr         = inject(ChangeDetectorRef);
+  private readonly sidebarState = inject(SidebarStateService);
 
   readonly user = this.auth.sessionUser;
+  readonly sidebarCollapsed = this.sidebarState.sidebarCollapsed;
 
   // ── Helpers de visibilidade (ESTÁTICOS - não dependem de rota) ──────────
   readonly isGlobal = computed(() => {
@@ -124,7 +127,6 @@ export class Sidebar implements OnInit, AfterViewInit, OnDestroy {
 
   // ── UI state ──────────────────────────────────────────────────────────────
   accountMenuOpen  = signal(false);
-  sidebarCollapsed = signal(false);
   searchQuery      = signal('');
   activeSection    = signal<'dashboard' | 'ti'>('dashboard');
 
@@ -247,7 +249,7 @@ export class Sidebar implements OnInit, AfterViewInit, OnDestroy {
 
   // ── UI actions ────────────────────────────────────────────────────────────
   toggleAccountMenu():  void { this.accountMenuOpen.update(v => !v); }
-  toggleSidebar():      void { this.sidebarCollapsed.update(v => !v); }
+  toggleSidebar():      void { this.sidebarState.toggleSidebar(); }
   logout():             void { this.auth.logout(); }
 
   openTicketModal(): void {
