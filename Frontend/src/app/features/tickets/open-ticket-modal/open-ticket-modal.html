@@ -1,200 +1,357 @@
-<div class="otm-backdrop" (click)="close()" aria-hidden="true"></div>
-
-<div class="otm-modal" role="dialog" aria-modal="true" aria-labelledby="otm-title-label">
-
-  <!-- Header -->
-  <div class="otm-header">
-    <div class="otm-header-left">
-      <div class="otm-header-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        </svg>
-      </div>
-      <div>
-        <h2 class="otm-title" id="otm-title-label">
-          @if (currentStep() === 'base')    { {{ destDept === 'DOC' ? 'Requisição de Processo — DOC' : 'Nova Solicitação' }} }
-          @if (currentStep() === 'doc')     { Adicionar Etapas (Opcional) }
-          @if (currentStep() === 'confirm') { Descrição e Anexos }
-        </h2>
-        <p class="otm-subtitle">
-          @if (currentStep() === 'base')    { {{ destDept === 'DOC' ? 'Dados da empresa e tipo de processo' : 'Preencha as informações do chamado' }} }
-          @if (currentStep() === 'doc')     { Adicione etapas sequenciais se necessário }
-          @if (currentStep() === 'confirm') { Adicione descrição e anexos antes de enviar }
-        </p>
-      </div>
+<div class="modal-overlay" (click)="close()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Abrir Novo Chamado</h2>
+      <button class="close-btn" (click)="close()">✕</button>
     </div>
-    <button class="otm-close" (click)="close()" aria-label="Fechar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
-  </div>
 
-  <!-- Steps indicator -->
-  <div class="otm-steps">
-    <span class="otm-step" [class.otm-step--active]="currentStep()==='base'"
-          [class.otm-step--done]="currentStep()==='confirm'">
-      <span class="otm-step-num">1</span> {{ destDept === 'DOC' ? 'Identificação' : 'Chamado' }}
-    </span>
-    <span class="otm-step-sep">›</span>
-    <span class="otm-step" [class.otm-step--active]="currentStep()==='confirm'">
-      <span class="otm-step-num">2</span> Descrição
-    </span>
-  </div>
-
-  <!-- Body -->
-  <div class="otm-body">
-
-    <!-- ══ STEP 1: BASE ═══════════════════════════════════════════════════ -->
-    @if (currentStep() === 'base') {
-      <div class="otm-form">
-
-        <!-- FLUXO DOC: Empresa, CNPJ, Tipo de Processo -->
-        @if (destDept === 'DOC') {
-          <div class="otm-section-label">Empresa / Cliente</div>
-          <div class="otm-row">
-            <div class="otm-field">
-              <label class="otm-label" for="otm-company">Empresa / Cliente</label>
-              <input id="otm-company" type="text" class="otm-input"
-                     [(ngModel)]="companyName" placeholder="Nome da empresa" />
-            </div>
-            <div class="otm-field">
-              <label class="otm-label" for="otm-cnpj">CNPJ</label>
-              <input id="otm-cnpj" type="text" class="otm-input"
-                     [(ngModel)]="companyCnpj" placeholder="00.000.000/0000-00" maxlength="18" />
-            </div>
-          </div>
-
-          <div class="otm-divider"></div>
-          <div class="otm-section-label">Tipo de Processo</div>
-
-          <div class="otm-field">
-            <label class="otm-label" for="otm-proc">Selecione o processo <span class="otm-req">*</span></label>
-            <select id="otm-proc" class="otm-input"
-                    [ngModel]="selectedProcessName ?? ''"
-                    (ngModelChange)="onProcessChange($event)">
-              <option value="">Selecione o processo…</option>
-              @for (p of docProcesses; track p) {
-                <option [value]="p">{{ p }}</option>
-              }
-            </select>
-          </div>
-        } @else {
-          <!-- FLUXO NORMAL: Título, Descrição, Prioridade, Destinatário -->
-          <div class="otm-field">
-            <label class="otm-label" for="otm-dept">Destinatário <span class="otm-req">*</span></label>
-            <select id="otm-dept" class="otm-input" [(ngModel)]="destDept" 
-                    [disabled]="isDeptLocked" (ngModelChange)="onDeptChange()">
+    <div class="modal-body">
+      <!-- ── STEP 1: Base Info ── -->
+      @if (currentStep() === 'base') {
+        <div class="form-section">
+          <!-- Departamento -->
+          <div class="form-group">
+            <label>Departamento *</label>
+            <select 
+              [(ngModel)]="destDept" 
+              (change)="onDeptChange()"
+              [disabled]="isDeptLocked"
+              class="form-control">
               <option value="">Selecione...</option>
-              @for (d of departments; track d.value) {
-                <option [value]="d.value">{{ d.label }}</option>
+              @for (dept of departments; track dept.value) {
+                <option [value]="dept.value">{{ dept.label }}</option>
               }
             </select>
           </div>
 
-          <div class="otm-field">
-            <label class="otm-label" for="otm-title">Título <span class="otm-req">*</span></label>
-            <input id="otm-title" type="text" class="otm-input" [(ngModel)]="title"
-                   maxlength="200" placeholder="Descreva brevemente o que precisa" />
-          </div>
-          <div class="otm-field">
-            <label class="otm-label" for="otm-desc">Descrição</label>
-            <textarea id="otm-desc" class="otm-input otm-textarea" rows="3"
-                      [(ngModel)]="description" placeholder="Detalhes adicionais (opcional)"></textarea>
-          </div>
-          <div class="otm-field">
-            <label class="otm-label" for="otm-pri">Prioridade <span class="otm-req">*</span></label>
-            <select id="otm-pri" class="otm-input" [(ngModel)]="priority">
+          <!-- Para DOC: Seleção de Processo -->
+          @if (isDoc) {
+            <div class="form-group">
+              <label>Tipo de Processo *</label>
+              @if (docProcessesLoading()) {
+                <div class="loading">Carregando processos...</div>
+              } @else if (docProcesses().length === 0) {
+                <div class="empty">Nenhum processo disponível</div>
+              } @else {
+                <select 
+                  [(ngModel)]="selectedProcessCode"
+                  (change)="onProcessChange(docProcesses().find(p => p.code === selectedProcessCode) || null)"
+                  class="form-control">
+                  <option value="">Selecione o processo...</option>
+                  @for (process of docProcesses(); track process.id) {
+                    <option [value]="process.code">
+                      {{ process.name }} ({{ process.steps.length }} etapas)
+                    </option>
+                  }
+                </select>
+              }
+            </div>
+
+            <!-- Informações da Empresa (DOC) -->
+            @if (selectedProcess()) {
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Empresa</label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="companyName" 
+                    placeholder="Nome da empresa"
+                    class="form-control">
+                </div>
+                <div class="form-group">
+                  <label>CNPJ</label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="companyCnpj" 
+                    placeholder="00.000.000/0000-00"
+                    class="form-control">
+                </div>
+              </div>
+            }
+          }
+
+          <!-- Para outros departamentos: Título -->
+          @if (!isDoc) {
+            <div class="form-group">
+              <label>Título *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="title" 
+                placeholder="Assunto do chamado"
+                class="form-control">
+            </div>
+          }
+
+          <!-- Prioridade -->
+          <div class="form-group">
+            <label>Prioridade</label>
+            <select [(ngModel)]="priority" class="form-control">
               @for (p of priorities; track p.value) {
                 <option [value]="p.value">{{ p.label }}</option>
               }
             </select>
           </div>
-        }
-      </div>
-    }
 
-    <!-- ══ STEP 2: CONFIRM (DESCRIÇÃO E ANEXOS) ═══════════════════════════ -->
-    @if (currentStep() === 'confirm') {
-      <div class="otm-form">
-        <div class="otm-field">
-          <label class="otm-label" for="otm-final-desc">Descrição do chamado</label>
-          <textarea id="otm-final-desc" class="otm-input otm-textarea" rows="5"
-                    [(ngModel)]="description" 
-                    placeholder="Descreva detalhadamente o que você precisa ou contexto adicional"></textarea>
-        </div>
+          <!-- Descrição -->
+          <div class="form-group">
+            <label>Descrição</label>
+            <textarea 
+              [(ngModel)]="description" 
+              placeholder="Descreva o problema ou solicitação"
+              rows="4"
+              class="form-control"></textarea>
+          </div>
 
-        <div class="otm-field">
-          <label class="otm-label">Anexar arquivos</label>
-          <div class="otm-file-zone">
-            <input type="file" id="otm-file-input" multiple (change)="onFileSelected($event)" style="display:none" />
-            <label for="otm-file-input" class="otm-file-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-              </svg>
-              Escolher arquivos
-            </label>
+          <!-- Anexos -->
+          <div class="form-group">
+            <label>Anexos</label>
+            <input 
+              type="file" 
+              multiple 
+              (change)="onFileSelected($event)"
+              class="form-control">
             @if (attachments.length > 0) {
-              <div class="otm-file-list">
-                @for (file of attachments; track $index) {
-                  <div class="otm-file-item">
-                    <span class="otm-file-name">{{ file.name }}</span>
-                    <button type="button" class="otm-file-remove" (click)="removeAttachment($index)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                      </svg>
-                    </button>
+              <div class="attachments-list">
+                @for (file of attachments; track file.name; let i = $index) {
+                  <div class="attachment-item">
+                    <span>{{ file.name }}</span>
+                    <button 
+                      type="button"
+                      (click)="removeAttachment(i)"
+                      class="remove-btn">✕</button>
                   </div>
                 }
               </div>
             }
           </div>
-        </div>
 
-        @if (destDept === 'DOC' && selectedProcess) {
-          <div class="otm-summary-box">
-            <div class="otm-summary-header">Resumo da requisição</div>
-            <div class="otm-summary-row">
-              <span class="otm-summary-key">Processo:</span>
-              <span class="otm-summary-val">{{ selectedProcess.name }}</span>
+          <!-- Mensagem de Erro -->
+          @if (errorMsg()) {
+            <div class="error-message">{{ errorMsg() }}</div>
+          }
+        </div>
+      }
+
+      <!-- ── STEP 2: DOC Steps Selection ── -->
+      @if (currentStep() === 'doc') {
+        <div class="form-section">
+          <h3>Etapas do Processo: {{ selectedProcess()?.name }}</h3>
+          <p class="subtitle">Selecione as etapas necessárias para este processo</p>
+
+          <!-- Etapas Disponíveis -->
+          @if (!pendingStep()) {
+            <div class="steps-grid">
+              @for (step of selectedProcess()?.steps || []; track step.id) {
+                <div class="step-card">
+                  <div class="step-info">
+                    <h4>{{ step.name }}</h4>
+                    <p class="step-code">{{ step.code }}</p>
+                    @if (step.informText) {
+                      <p class="step-text">{{ step.informText }}</p>
+                    }
+                  </div>
+                  <div class="step-requirements">
+                    @if (step.requiresDocuments) {
+                      <span class="req-badge">📎 Docs</span>
+                    }
+                    @if (step.requiresCompany) {
+                      <span class="req-badge">🏢 Empresa</span>
+                    }
+                    @if (step.requiresEmailAddress) {
+                      <span class="req-badge">✉️ Email</span>
+                    }
+                  </div>
+                  <button 
+                    type="button"
+                    (click)="selectStepToAdd(step)"
+                    class="btn-select">
+                    Selecionar
+                  </button>
+                </div>
+              }
             </div>
-            @if (companyName) {
-              <div class="otm-summary-row">
-                <span class="otm-summary-key">Empresa:</span>
-                <span class="otm-summary-val">{{ companyName }}{{ companyCnpj ? ' — ' + companyCnpj : '' }}</span>
+          }
+
+          <!-- Formulário da Etapa Selecionada -->
+          @if (pendingStep()) {
+            <div class="step-form">
+              <h4>{{ pendingStep()?.name }}</h4>
+              
+              @if (pendingStep()?.requiresDocuments) {
+                <div class="form-group">
+                  <label>Documentos Necessários *</label>
+                  <textarea 
+                    [(ngModel)]="pendingStepDescription"
+                    placeholder="Liste os documentos ou descreva as informações"
+                    rows="3"
+                    class="form-control"></textarea>
+                </div>
+              }
+
+              @if (pendingStep()?.requiresEmailAddress) {
+                <div class="form-group">
+                  <label>Email de Destino *</label>
+                  <input 
+                    type="email"
+                    [(ngModel)]="pendingStepEmail"
+                    placeholder="email@example.com"
+                    class="form-control">
+                </div>
+              }
+
+              @if (!pendingStep()?.requiresDocuments && !pendingStep()?.requiresEmailAddress) {
+                <p class="info-text">Esta etapa não requer informações adicionais</p>
+              }
+
+              @if (errorMsg()) {
+                <div class="error-message">{{ errorMsg() }}</div>
+              }
+
+              <div class="form-actions">
+                <button 
+                  type="button"
+                  (click)="addStep()"
+                  class="btn btn-primary">
+                  Adicionar Etapa
+                </button>
+                <button 
+                  type="button"
+                  (click)="cancelStepSelection()"
+                  class="btn btn-secondary">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Etapas Adicionadas -->
+          @if (addedSteps().length > 0) {
+            <div class="added-steps">
+              <h4>Etapas Selecionadas ({{ addedSteps().length }})</h4>
+              <div class="steps-summary">
+                @for (entry of addedSteps(); track entry.step.id; let i = $index) {
+                  <div class="summary-item">
+                    <span class="step-name">{{ entry.step.name }}</span>
+                    @if (entry.description) {
+                      <span class="step-detail">{{ entry.description }}</span>
+                    }
+                    @if (entry.emailDestination) {
+                      <span class="step-detail">📧 {{ entry.emailDestination }}</span>
+                    }
+                    <button 
+                      type="button"
+                      (click)="removeStep(i)"
+                      class="remove-btn">✕</button>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ── STEP 3: Confirmation ── -->
+      @if (currentStep() === 'confirm') {
+        <div class="form-section confirmation">
+          <h3>Resumo do Chamado</h3>
+          
+          <div class="summary-field">
+            <label>Título</label>
+            <p>{{ title }}</p>
+          </div>
+
+          @if (description) {
+            <div class="summary-field">
+              <label>Descrição</label>
+              <p>{{ description }}</p>
+            </div>
+          }
+
+          <div class="summary-field">
+            <label>Departamento</label>
+            <p>{{ departments.find(d => d.value === destDept)?.label }}</p>
+          </div>
+
+          <div class="summary-field">
+            <label>Prioridade</label>
+            <p>{{ priorities.find(p => p.value === priority)?.label }}</p>
+          </div>
+
+          @if (isDoc && selectedProcess()) {
+            <div class="summary-field">
+              <label>Processo</label>
+              <p>{{ selectedProcess()?.name }}</p>
+            </div>
+
+            @if (companyName || companyCnpj) {
+              <div class="summary-field">
+                <label>Empresa</label>
+                <p>{{ companyName }} {{ companyCnpj ? `(${companyCnpj})` : '' }}</p>
               </div>
             }
-          </div>
-        }
-      </div>
-    }
 
-    @if (errorMsg) {
-      <div class="otm-error-inline" role="alert">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        {{ errorMsg }}
-      </div>
-    }
-  </div>
+            @if (addedSteps().length > 0) {
+              <div class="summary-field">
+                <label>Etapas</label>
+                <ul>
+                  @for (entry of addedSteps(); track entry.step.id) {
+                    <li>{{ entry.step.name }}</li>
+                  }
+                </ul>
+              </div>
+            }
+          }
 
-  <!-- Footer -->
-  <div class="otm-footer">
-    <button class="otm-btn otm-btn--ghost" (click)="back()" [disabled]="currentStep() === 'base'">
-      ← Voltar
-    </button>
-    <div class="otm-footer-right">
-      @if (currentStep() === 'base') {
-        <button class="otm-btn otm-btn--primary" (click)="next()">
+          @if (attachments.length > 0) {
+            <div class="summary-field">
+              <label>Anexos ({{ attachments.length }})</label>
+              <ul>
+                @for (file of attachments; track file.name) {
+                  <li>{{ file.name }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (errorMsg()) {
+            <div class="error-message">{{ errorMsg() }}</div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      @if (currentStep() !== 'base') {
+        <button 
+          type="button"
+          (click)="back()"
+          [disabled]="loading()"
+          class="btn btn-secondary">
+          ← Voltar
+        </button>
+      }
+
+      @if (currentStep() === 'base' || currentStep() === 'doc') {
+        <button 
+          type="button"
+          (click)="next()"
+          [disabled]="loading()"
+          class="btn btn-primary">
           Próximo →
         </button>
       }
+
       @if (currentStep() === 'confirm') {
-        <button class="otm-btn otm-btn--primary" (click)="submit()" [disabled]="loading">
-          @if (loading) { <span class="otm-spinner otm-spinner--dark"></span> Enviando… }
-          @else         { Enviar solicitação }
+        <button 
+          type="button"
+          (click)="submit()"
+          [disabled]="loading()"
+          class="btn btn-success">
+          @if (loading()) {
+            ⏳ Criando...
+          } @else {
+            ✓ Criar Chamado
+          }
         </button>
       }
     </div>
