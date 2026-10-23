@@ -80,6 +80,7 @@ export interface TicketResponse {
   docDetail?:         DocDetailResponse;
   meta?:              TicketMeta;
   history?:           HistoryEntry[];
+  extraData?:         Record<string, unknown>;
 }
 
 export interface Page<T> {
@@ -98,6 +99,7 @@ export interface TicketRequest {
   sourceRoute?:    string;
   /** DOC */
   processId?:      number;
+  processName?:    string;
   stepId?:         number;
   companyName?:    string;
   companyCnpj?:    string;
@@ -162,6 +164,18 @@ export class TicketService {
     const params = new HttpParams().set('page', page).set('size', size);
     return this.http.get<Page<TicketResponse>>(`${this.api}/dept/${dept}`, { params }).pipe(
       catchError(() => of(this.local.getByDept(dept, page, size))),
+    );
+  }
+
+  /**
+   * Alias para getByDept - lista tickets de um departamento
+   */
+  listByDepartment(dept: DestDepartment, page = 0, size = 20): Observable<TicketResponse[]> {
+    return this.getByDept(dept, page, size).pipe(
+      catchError(() => {
+        const page = this.local.getByDept(dept, 0, 20);
+        return of(page.content);
+      }),
     );
   }
 

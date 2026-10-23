@@ -53,11 +53,11 @@
 }
 .ds-user-name { font-size:.8rem; font-weight:600; color:#e8f5ec; }
 .ds-dropdown {
-  position:absolute; top:calc(100%+.5rem); right:0; min-width:200px;
-  background:#16171a; backdrop-filter:blur(16px);
-  border:1px solid #282a2d; border-radius:6px;
-  box-shadow:0 16px 48px rgba(0,0,0,.6); overflow:hidden;
-  animation:ds-dd .16s cubic-bezier(.16,1,.3,1); z-index:500;
+  position: absolute; top: calc(100% + 0.5rem); right: 0; min-width: 200px;
+  background: #16171a; backdrop-filter: blur(16px);
+  border: 1px solid #282a2d; border-radius: 6px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.6); overflow: hidden;
+  animation: ds-dd .16s cubic-bezier(.16,1,.3,1); z-index: 500;
 }
 @keyframes ds-dd { from{opacity:0;transform:translateY(-6px) scale(.97)} to{opacity:1;transform:none} }
 .ds-dropdown-info { padding:.75rem 1rem .65rem; }

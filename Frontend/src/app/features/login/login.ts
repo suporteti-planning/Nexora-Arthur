@@ -16,7 +16,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { IntroAnimationComponent } from './intro-animation/intro-animation';
 import gsap from 'gsap';
 
 type FormMode = 'login' | 'register';
@@ -24,7 +23,7 @@ type FormMode = 'login' | 'register';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, IntroAnimationComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.html',
   styleUrl:    './login.css',
 })

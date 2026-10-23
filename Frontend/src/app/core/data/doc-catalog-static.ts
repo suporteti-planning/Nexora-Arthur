@@ -3,7 +3,7 @@
  * Espelha exatamente os 26 processos da migration V7.
  * IDs negativos indicam dados locais (não persistidos no backend).
  */
-import { DocProcessDTO, DocStepDTO } from '../services/doc-catalog.service';
+import { DocProcessResponse, DocStepResponse } from '../services/doc-catalog.service';
 
 let _stepId = -1;
 const step = (
@@ -11,7 +11,7 @@ const step = (
   informText?: string,
   requiresEmailAddress = false,
   requiresCompany = false,
-): DocStepDTO => ({
+): DocStepResponse => ({
   id: _stepId--,
   code: '',
   name,
@@ -22,22 +22,23 @@ const step = (
   sortOrder: 0,
 });
 
-const EMAIL_STEP: DocStepDTO = {
+const EMAIL_STEP: DocStepResponse = {
   id: 0, code: '', name: 'Etapa Email com Endereço Livre para Digitação',
   requiresEmailAddress: true, requiresCompany: false, requiresDocuments: false, sortOrder: 0,
 };
-const es = (): DocStepDTO => ({ ...EMAIL_STEP, id: _stepId-- });
+const es = (): DocStepResponse => ({ ...EMAIL_STEP, id: _stepId-- });
 
 let _procId = -1;
-const proc = (name: string, steps: DocStepDTO[]): DocProcessDTO => ({
+const proc = (name: string, steps: DocStepResponse[]): DocProcessResponse => ({
   id: _procId--,
   code: '',
   name,
+  description: '',
   sortOrder: 0,
   steps: steps.map((s, i) => ({ ...s, sortOrder: i + 1 })),
 });
 
-export const DOC_CATALOG_STATIC: DocProcessDTO[] = [
+export const DOC_CATALOG_STATIC: DocProcessResponse[] = [
   proc('1. ALTERAÇÃO DENOMINAÇÃO / ENDEREÇO / OBJETO SOCIAL', [
     step('Documentação Inicial - Cliente'),
     step('Enquadramento'),

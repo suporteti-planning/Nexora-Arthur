@@ -1,13 +1,12 @@
 import { Component, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TicketPanel } from '../ticket-panel/ticket-panel';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-meus-chamados',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, TicketPanel],
+  imports: [CommonModule, TicketPanel],
   templateUrl: './meus-chamados.html',
   styleUrl: './meus-chamados.css',
 })
