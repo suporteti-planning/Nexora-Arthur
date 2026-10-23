@@ -1,0 +1,157 @@
+<div class="doc-home-container">
+  <div class="doc-header">
+    <h1>Gestão de Documentação (DOC)</h1>
+    <p>Acompanhe o progresso dos processos de documentação por ticket</p>
+  </div>
+
+  <div class="doc-content">
+    <!-- Coluna: Lista de Tickets -->
+    <div class="tickets-panel">
+      <h2>Tickets Abertos</h2>
+      
+      @if (loading()) {
+        <div class="loading">Carregando tickets...</div>
+      } @else if (tickets().length === 0) {
+        <div class="empty-state">Nenhum ticket aberto para o departamento DOC</div>
+      } @else {
+        <div class="tickets-list">
+          @for (ticket of tickets(); track ticket.id) {
+            <div 
+              class="ticket-item"
+              [class.active]="selectedTicket()?.id === ticket.id"
+              (click)="selectTicket(ticket)">
+              <div class="ticket-header">
+                <span class="ticket-number">#{{ ticket.id }}</span>
+                <span class="ticket-priority" [class]="'priority-' + (ticket.priority || 'medium')">
+                  {{ ticket.priority || 'Normal' }}
+                </span>
+              </div>
+              <p class="ticket-title">{{ ticket.title }}</p>
+              <p class="ticket-date">{{ ticket.createdAt | date:'short' }}</p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Coluna: Detalhes e Etapas -->
+    <div class="details-panel">
+      @if (!selectedTicket()) {
+        <div class="empty-state">
+          <p>Selecione um ticket para ver as etapas</p>
+        </div>
+      } @else {
+        <div class="ticket-details">
+          <!-- Cabeçalho do Ticket -->
+          <div class="details-header">
+            <div class="ticket-info">
+              <h3>Ticket #{{ selectedTicket()!.id }}</h3>
+              <p class="ticket-desc">{{ selectedTicket()!.title }}</p>
+              <p class="ticket-status">
+                Status: 
+                <span [class]="'status-' + (selectedTicket()!.status || 'open')">
+                  {{ selectedTicket()!.status || 'Aberto' }}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Etapas do Processo -->
+          @if (processesLoading()) {
+            <div class="loading">Carregando processos...</div>
+          } @else if (stepsForProcess().length === 0) {
+            <div class="empty-state">
+              <p>Nenhuma etapa definida para este processo</p>
+            </div>
+          } @else {
+            <div class="steps-section">
+              <h4>Etapas do Processo</h4>
+              
+              <div class="steps-progress">
+                <div class="progress-bar">
+                  <div 
+                    class="progress-fill"
+                    [style.width.%]="(stepsForProcess().filter(s => stepsStatus()[s.id] === 'completed').length / stepsForProcess().length * 100)">
+                  </div>
+                </div>
+                <span class="progress-text">
+                  {{ stepsForProcess().filter(s => stepsStatus()[s.id] === 'completed').length }}
+                  / {{ stepsForProcess().length }} concluídas
+                </span>
+              </div>
+
+              <div class="steps-list">
+                @for (step of stepsForProcess(); track step.id; let i = $index) {
+                  <div [class]="'step-card ' + getStepStatusClass(step.id)">
+                    <div class="step-header">
+                      <span class="step-number">{{ i + 1 }}</span>
+                      <div class="step-title">
+                        <h5>{{ step.name }}</h5>
+                        <p class="step-code">{{ step.code }}</p>
+                      </div>
+                    </div>
+
+                    @if (step.informText) {
+                      <p class="step-info">{{ step.informText }}</p>
+                    }
+
+                    <div class="step-requirements">
+                      @if (step.requiresDocuments) {
+                        <span class="requirement">📎 Exige documentos</span>
+                      }
+                      @if (step.requiresCompany) {
+                        <span class="requirement">🏢 Exige empresa</span>
+                      }
+                      @if (step.requiresEmailAddress) {
+                        <span class="requirement">✉️ Exige email</span>
+                      }
+                    </div>
+
+                    <div class="step-status-selector">
+                      <label>Status:</label>
+                      <div class="status-buttons">
+                        <button 
+                          class="status-btn pending"
+                          [class.active]="stepsStatus()[step.id] === 'pending'"
+                          (click)="toggleStepStatus(step.id, 'pending')">
+                          Pendente
+                        </button>
+                        <button 
+                          class="status-btn in-progress"
+                          [class.active]="stepsStatus()[step.id] === 'in_progress'"
+                          (click)="toggleStepStatus(step.id, 'in_progress')">
+                          Em Progresso
+                        </button>
+                        <button 
+                          class="status-btn completed"
+                          [class.active]="stepsStatus()[step.id] === 'completed'"
+                          (click)="toggleStepStatus(step.id, 'completed')">
+                          ✓ Concluída
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Botões de Ação -->
+              <div class="actions">
+                <button 
+                  class="btn btn-primary"
+                  [disabled]="!stepsForProcess().length"
+                  (click)="saveProgress()">
+                  💾 Salvar Progresso
+                </button>
+                @if (isProcessComplete()) {
+                  <div class="completion-badge">
+                    ✓ Processo completo!
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

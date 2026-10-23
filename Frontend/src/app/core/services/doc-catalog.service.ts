@@ -1,66 +1,64 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, shareReplay, catchError } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { DOC_CATALOG_STATIC } from '../data/doc-catalog-static';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
-export interface DocStepDTO {
-  id:               number;
-  code:             string;
-  name:             string;
-  informText?:      string;
-  requiresCompany:  boolean;
-  requiresDocuments:boolean;
+export interface DocStepResponse {
+  id: number;
+  code: string;
+  name: string;
+  informText: string;
+  requiresCompany: boolean;
+  requiresDocuments: boolean;
   requiresEmailAddress: boolean;
-  sortOrder:        number;
+  sortOrder: number;
 }
 
-export interface DocProcessDTO {
-  id:          number;
-  code:        string;
-  name:        string;
-  description?:string;
-  sortOrder:   number;
-  steps:       DocStepDTO[];
+export interface DocProcessResponse {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  sortOrder: number;
+  steps: DocStepResponse[];
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class DocCatalogService {
-  private readonly api = `${environment.apiUrl}/api/doc/catalog`;
-  private catalogCache$: Observable<DocProcessDTO[]> | null = null;
-
-  constructor(private http: HttpClient) {}
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = '/api/doc/catalog';
+  private processesCache$ = new BehaviorSubject<DocProcessResponse[]>([]);
 
   /**
-   * Tenta buscar do backend. Se falhar (offline/erro), usa o catálogo
-   * estático embutido no frontend — os 26 processos oficiais da planilha.
+   * Busca todos os processos de documentação com suas etapas
    */
-  getCatalog(): Observable<DocProcessDTO[]> {
-    if (!this.catalogCache$) {
-      this.catalogCache$ = this.http
-        .get<DocProcessDTO[]>(`${this.api}/processes`)
-        .pipe(
-          catchError(() => of(DOC_CATALOG_STATIC)),
-          shareReplay({ bufferSize: 1, refCount: true }),
-        );
-    }
-    return this.catalogCache$;
+  getProcesses(): Observable<DocProcessResponse[]> {
+    return this.http.get<DocProcessResponse[]>(`${this.apiUrl}/processes`)
+      .pipe(
+        tap(processes => this.processesCache$.next(processes))
+      );
   }
 
-  getSummaries(): Observable<DocProcessDTO[]> {
-    return this.http.get<DocProcessDTO[]>(`${this.api}/processes/summary`)
-      .pipe(catchError(() => of(DOC_CATALOG_STATIC)));
+  /**
+   * Busca processo específico por código
+   */
+  getProcessByCode(code: string): Observable<DocProcessResponse> {
+    return this.http.get<DocProcessResponse>(`${this.apiUrl}/processes/${code}`);
   }
 
-  getProcess(id: number): Observable<DocProcessDTO> {
-    return this.http.get<DocProcessDTO>(`${this.api}/processes/${id}`)
-      .pipe(catchError(() => of(DOC_CATALOG_STATIC.find(p => p.id === id)!)));
+  /**
+   * Retorna os processos em cache (sem fazer nova requisição)
+   */
+  getProcessesFromCache(): DocProcessResponse[] {
+    return this.processesCache$.value;
   }
 
-  getSteps(processId: number): Observable<DocStepDTO[]> {
-    return this.http.get<DocStepDTO[]>(`${this.api}/processes/${processId}/steps`)
-      .pipe(catchError(() => of(DOC_CATALOG_STATIC.find(p => p.id === processId)?.steps ?? [])));
+  /**
+   * Limpa o cache
+   */
+  clearCache(): void {
+    this.processesCache$.next([]);
   }
-
-  clearCache(): void { this.catalogCache$ = null; }
 }
