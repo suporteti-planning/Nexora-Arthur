@@ -7,7 +7,7 @@ export interface DocStepResponse {
   id: number;
   code: string;
   name: string;
-  informText: string;
+  informText?: string;
   requiresCompany: boolean;
   requiresDocuments: boolean;
   requiresEmailAddress: boolean;

@@ -24,6 +24,7 @@ const step = (
 
 const EMAIL_STEP: DocStepResponse = {
   id: 0, code: '', name: 'Etapa Email com Endereço Livre para Digitação',
+  informText: undefined,
   requiresEmailAddress: true, requiresCompany: false, requiresDocuments: false, sortOrder: 0,
 };
 const es = (): DocStepResponse => ({ ...EMAIL_STEP, id: _stepId-- });

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, of, catchError } from 'rxjs';
+import { Observable, of, catchError, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 import { TicketLocalService } from './ticket-local.service';
@@ -172,6 +172,7 @@ export class TicketService {
    */
   listByDepartment(dept: DestDepartment, page = 0, size = 20): Observable<TicketResponse[]> {
     return this.getByDept(dept, page, size).pipe(
+      map(pageResult => pageResult.content),
       catchError(() => {
         const page = this.local.getByDept(dept, 0, 20);
         return of(page.content);

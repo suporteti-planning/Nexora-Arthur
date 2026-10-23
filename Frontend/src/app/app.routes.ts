@@ -45,7 +45,7 @@ export const routes: Routes = [
   { path: 'doc', component: NavbarLayout, canActivate: [authGuard, departmentGuard('DOC')],
     children: [
       { path: '', redirectTo: 'doc', pathMatch: 'full' },
-      { path: 'doc', loadComponent: () => import('./features/doc/doc-home').then(m => m.DocHomePage) },
+      { path: 'doc', loadComponent: () => import('./features/doc/doc-home/doc-home').then(m => m.DocHomePage) },
     ]
   },
 
